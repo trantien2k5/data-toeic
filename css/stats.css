@@ -1,7 +1,72 @@
 /* ===== Stats tab ===== */
+
+/* Hero: tiến độ tổng + theo từng Level + nút tiếp tục học */
+.toeic-hero {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  box-shadow: var(--elev-1);
+  border: 1px solid var(--outline);
+  margin-bottom: 16px;
+}
+.toeic-hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.toeic-hero-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.toeic-hero-pct {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 8px 0 14px;
+}
+.toeic-hero-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hero-level-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.hero-level-name {
+  flex-shrink: 0;
+  width: 90px;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.hero-level-bar-bg {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.05);
+  height: 8px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.hero-level-bar-fill {
+  background: linear-gradient(90deg, var(--primary), var(--accent-light));
+  height: 100%;
+  border-radius: var(--radius-pill);
+}
+.hero-level-count {
+  flex-shrink: 0;
+  width: 40px;
+  text-align: right;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+}
+
+/* 4 KPI chính: Accuracy / Streak / TOEIC ước tính / Đã làm */
 .hero-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -26,9 +91,6 @@
   font-size: 12.5px;
   color: var(--ink-soft);
   margin-top: 4px;
-}
-.hero-card .cat-bar-bg {
-  margin-bottom: 10px;
 }
 
 /* Xu hướng điểm số các lượt làm gần nhất */
@@ -55,31 +117,6 @@
   background: linear-gradient(180deg, var(--red), #fb7185);
 }
 
-.stats-overview {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
-}
-.stat-box {
-  background: var(--surface);
-  border-radius: var(--radius-md);
-  padding: 20px 14px;
-  text-align: center;
-  box-shadow: var(--elev-1);
-  border: 1px solid var(--outline);
-}
-.stat-box .v {
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--primary-dark);
-  text-shadow: 0 0 12px rgba(99, 102, 241, 0.1);
-}
-.stat-box .l {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-  margin-top: 8px;
-}
 .section-title {
   font-size: 16px;
   font-weight: 700;

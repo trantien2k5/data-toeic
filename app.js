@@ -3,7 +3,7 @@ import { state } from './js/modules/state.js';
 import { el, showScreen, showTab, initFullscreen, onTabChange, showConfirm, showAlert, shuffle, getSuffix } from './js/modules/utils.js';
 import { loadProgress, exportProgressJSON, mergeProgressJSON } from './js/modules/storage.js';
 import { renderExamList, startExam, toggleView, renderQuestion, finishExam, applyReviewFilter } from './js/modules/quiz.js';
-import { renderStats, showStatScreen, buildReportText } from './js/modules/stats.js';
+import { renderStats, showStatScreen, buildReportText, continueLearning } from './js/modules/stats.js';
 
 async function loadQuestions() {
   try {
@@ -229,6 +229,12 @@ function initEventListeners() {
   document.querySelectorAll('#tab-stats .stat-back').forEach(btn => {
     btn.addEventListener('click', () => showStatScreen('stat-home'));
   });
+
+  // Hero: tiếp tục học ngay đề chưa hoàn thành
+  el('btn-continue-learning').addEventListener('click', continueLearning);
+
+  // Đi tới màn đồng bộ dữ liệu
+  el('btn-go-sync').addEventListener('click', () => showStatScreen('stat-detail-sync'));
 
   // Export report
   el('btn-export-report').addEventListener('click', () => {

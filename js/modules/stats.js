@@ -1,8 +1,15 @@
 import { CATEGORY_LABEL, TIME_BUCKETS, ANSWER_TO_CATEGORY } from './constants.js';
 import { state } from './state.js';
-import { el, formatDate, getSuffix, shuffle, showTab } from './utils.js';
+import { el, formatDate, getSuffix, shuffle, showTab, showAlert } from './utils.js';
 import { getExamProgress } from './storage.js';
 import { startExam, viewHistoryEntry } from './quiz.js';
+
+const LEVEL_LABELS = [
+  "Level 1 · Cơ bản",
+  "Level 2 · Theo hậu tố",
+  "Level 3 · Từ dễ nhầm",
+  "Level 4 · TOEIC thực tế",
+];
 
 // Một đề "ổn định" khi ≥3 lượt làm gần nhất đều đạt ≥90% — phân biệt với
 // việc chỉ đạt điểm cao đúng 1 lần (có thể do may mắn) rồi không lặp lại được.
@@ -52,7 +59,6 @@ export function renderStats() {
     tbody.appendChild(row);
   });
 
-  el('ov-completed').textContent = completed + '/' + examIds.length;
   el('ov-attempts').textContent = totalAttempts;
   el('ov-accuracy').textContent = (totalAnswered > 0 ? Math.round(totalCorrect / totalAnswered * 100) : 0) + '%';
   el('ov-answered').textContent = totalAnswered;
@@ -95,21 +101,63 @@ export function renderStats() {
   showStatScreen('stat-home');
 }
 
-// Tổng tiến độ + streak (đúng liên tiếp) + điểm sẵn sàng TOEIC dự đoán —
-// kết hợp tỉ lệ hoàn thành đề và độ chính xác chung thành một chỉ số tổng quát.
+// Tổng tiến độ + tiến độ từng level + streak + ước tính TOEIC tham khảo.
 export function renderHeroStats(completedExams, totalExams, totalAnswered, totalCorrect) {
   const progressPct = totalExams > 0 ? Math.round(completedExams / totalExams * 100) : 0;
   el('hero-progress-fill').style.width = progressPct + '%';
   el('hero-progress-pct').textContent = progressPct + '%';
+
+  renderHeroLevels();
 
   const streak = state.progress.streak || { current: 0, best: 0 };
   el('hero-streak-current').textContent = streak.current;
   el('hero-streak-best').textContent = streak.best;
 
   const accuracyPct = totalAnswered > 0 ? Math.round(totalCorrect / totalAnswered * 100) : 0;
-  const readiness = Math.round(progressPct * 0.4 + accuracyPct * 0.6);
-  el('hero-readiness').textContent = readiness + '%';
-  el('hero-readiness-predict').textContent = Math.round(accuracyPct / 100 * 30) + '/30';
+  el('hero-toeic-range').textContent = estimateToeicRange(accuracyPct);
+}
+
+// Trạng thái hoàn thành từng Level (đề đã xong / tổng số đề) trong hero.
+function renderHeroLevels() {
+  const wrap = el('hero-levels');
+  wrap.innerHTML = '';
+  LEVEL_LABELS.forEach((label, i) => {
+    const exams = state.EXAMS.filter(e => e.level === label);
+    if (exams.length === 0) return;
+    const doneCount = exams.filter(e => getExamProgress(e.id).status === 'done').length;
+    const pct = Math.round(doneCount / exams.length * 100);
+    const row = document.createElement('div');
+    row.className = 'hero-level-row';
+    row.innerHTML =
+      '<span class="hero-level-name">' + (doneCount === exams.length ? '✅' : '⬜') + ' Level ' + (i + 1) + '</span>' +
+      '<div class="hero-level-bar-bg"><div class="hero-level-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<span class="hero-level-count">' + doneCount + '/' + exams.length + '</span>';
+    wrap.appendChild(row);
+  });
+}
+
+// Quy đổi tham khảo THÔ từ % chính xác nhận diện từ loại sang khoảng điểm TOEIC.
+// Đây KHÔNG phải dự đoán điểm thi thật — TOEIC còn nhiều kỹ năng khác (nghe,
+// đọc hiểu...) mà app này không đo được. Chỉ mang tính minh hoạ/tham khảo.
+function estimateToeicRange(accuracyPct) {
+  if (accuracyPct <= 0) return '—';
+  if (accuracyPct < 50) return '300-350';
+  if (accuracyPct < 65) return '350-400';
+  if (accuracyPct < 75) return '400-450';
+  if (accuracyPct < 85) return '450-500';
+  if (accuracyPct < 93) return '500-550';
+  return '550-600';
+}
+
+// Tìm đề chưa hoàn thành đầu tiên (theo thứ tự Level) và bắt đầu làm ngay.
+export function continueLearning() {
+  const next = state.EXAMS.find(e => getExamProgress(e.id).status !== 'done');
+  if (!next) {
+    showAlert('🎉 Bạn đã hoàn thành tất cả các đề hiện có!');
+    return;
+  }
+  showTab('exams');
+  startExam(next.id);
 }
 
 // Với mỗi từ bị sai, tìm đáp án bạn hay chọn nhầm nhất — giúp thấy rõ kiểu
@@ -161,19 +209,24 @@ export function renderStatsHome() {
   const answeredWithTime = TIME_BUCKETS.reduce((s, b) => s + (state.progress.timeStats[b.key] || 0), 0);
   const confusionCount = buildConfusionRows().length;
 
+  const historyForTrend = state.progress.history || [];
+
+  // Thứ tự nhóm theo mức độ quan trọng: Tiến độ → Phân tích → Ôn tập → Lịch sử.
+  // "Đồng bộ dữ liệu" không còn là card ở đây — đã chuyển thành nút riêng ở
+  // cuối tab (xem nút "Đồng bộ" cạnh "Xuất báo cáo .txt").
   const cards = [
-    { id: 'stat-detail-category', icon: 'category', title: 'Theo từ loại', sub: 'Noun / Verb / Adjective / Adverb' },
-    { id: 'stat-detail-level', icon: 'stairs', title: 'Accuracy theo Level', sub: 'Tiến độ từng giai đoạn' },
-    { id: 'stat-detail-suffix', icon: 'spellcheck', title: 'Theo hậu tố', sub: 'Quy tắc hậu tố bạn còn yếu' },
-    { id: 'stat-detail-family', icon: 'account_tree', title: 'Theo Word Family', sub: familyCount + ' nhóm từ cùng gốc' },
-    { id: 'stat-detail-time', icon: 'timer', title: 'Theo thời gian trả lời', sub: answeredWithTime + ' câu đã đo thời gian' },
-    { id: 'stat-detail-confusion', icon: 'psychology_alt', title: 'Phân tích nhầm lẫn', sub: confusionCount + ' từ hay bị nhầm từ loại' },
-    { id: 'stat-detail-exams', icon: 'table_chart', title: 'Theo từng đề', sub: completedExams + '/' + examIds.length + ' đề hoàn thành' },
-    { id: 'stat-detail-worst', icon: 'trending_down', title: 'Từ sai nhiều nhất', sub: wrongWordsCount + ' từ cần ôn lại' },
-    { id: 'stat-detail-best', icon: 'military_tech', title: 'Từ đã thành thạo', sub: buildBestWordsRows().length + ' từ làm tốt' },
-    { id: 'stat-detail-history', icon: 'history', title: 'Lịch sử làm bài', sub: historyCount + ' lượt đã làm' },
-    { id: 'stat-detail-plan', icon: 'flag', title: 'Kế hoạch tiếp theo', sub: 'Bạn nên học gì tiếp theo?' },
-    { id: 'stat-detail-sync', icon: 'sync', title: 'Đồng bộ dữ liệu', sub: 'Sao lưu & khôi phục tiến độ học tập' },
+    { id: 'stat-detail-trend', icon: '📈', title: 'Tiến độ theo thời gian', sub: historyForTrend.length + ' lượt đã ghi nhận' },
+    { id: 'stat-detail-level', icon: '🎯', title: 'Accuracy theo Level', sub: 'Tiến độ từng giai đoạn' },
+    { id: 'stat-detail-category', icon: '📚', title: 'Theo từ loại', sub: 'Noun / Verb / Adjective / Adverb' },
+    { id: 'stat-detail-suffix', icon: '🧩', title: 'Theo hậu tố', sub: 'Quy tắc hậu tố bạn còn yếu' },
+    { id: 'stat-detail-family', icon: '🔤', title: 'Theo Word Family', sub: familyCount + ' nhóm từ cùng gốc' },
+    { id: 'stat-detail-time', icon: '⚡', title: 'Theo thời gian trả lời', sub: answeredWithTime + ' câu đã đo thời gian' },
+    { id: 'stat-detail-worst', icon: '🔥', title: 'Từ sai nhiều nhất', sub: wrongWordsCount + ' từ cần ôn lại' },
+    { id: 'stat-detail-best', icon: '⭐', title: 'Từ đã thành thạo', sub: buildBestWordsRows().length + ' từ làm tốt' },
+    { id: 'stat-detail-exams', icon: '📝', title: 'Theo từng đề', sub: completedExams + '/' + examIds.length + ' đề hoàn thành' },
+    { id: 'stat-detail-history', icon: '📜', title: 'Lịch sử làm bài', sub: historyCount + ' lượt đã làm' },
+    { id: 'stat-detail-confusion', icon: '🧠', title: 'Phân tích nhầm lẫn', sub: confusionCount + ' từ hay bị nhầm từ loại' },
+    { id: 'stat-detail-plan', icon: '📋', title: 'Kế hoạch tiếp theo', sub: 'Bạn nên học gì tiếp theo?' },
   ];
 
   const grid = el('stat-category-grid');
@@ -182,7 +235,7 @@ export function renderStatsHome() {
     const card = document.createElement('div');
     card.className = 'level-card';
     card.innerHTML =
-      '<div class="lc-top"><span class="material-symbols-outlined">' + c.icon + '</span><h3>' + c.title + '</h3></div>' +
+      '<div class="lc-top"><span class="lc-icon">' + c.icon + '</span><h3>' + c.title + '</h3></div>' +
       '<div class="lc-sub">' + c.sub + '</div>' +
       '<div class="lc-footer"><span></span><span class="lc-arrow">Xem chi tiết <span class="material-symbols-outlined">arrow_forward</span></span></div>';
     card.addEventListener('click', () => showStatScreen(c.id));
@@ -342,12 +395,6 @@ export function renderSuffixStats() {
 }
 
 export function buildLevelAccuracy() {
-  const LEVEL_LABELS = [
-    "Level 1 · Cơ bản",
-    "Level 2 · Theo hậu tố",
-    "Level 3 · Từ dễ nhầm",
-    "Level 4 · TOEIC thực tế",
-  ];
   const groups = {};
   LEVEL_LABELS.forEach(l => { groups[l] = { correct: 0, wrong: 0 }; });
   Object.values(state.progress.wordStats || {}).forEach(w => {
