@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&display=block">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body oncontextmenu="return false" oncopy="return false" oncut="return false">
 
@@ -267,6 +267,17 @@
 </div>
 </div>
 
-<script src="app.js"></script>
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <button data-tab="exams" class="active">
+    <span class="material-symbols-outlined">edit_note</span>
+    <span>Làm bài</span>
+  </button>
+  <button data-tab="stats">
+    <span class="material-symbols-outlined">bar_chart</span>
+    <span>Thống kê</span>
+  </button>
+</nav>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>

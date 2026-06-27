@@ -1406,3 +1406,92 @@ table.exam-table tr:last-child td {
     font-size: 13px;
   }
 }
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 859px) {
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: var(--surface);
+    backdrop-filter: var(--backdrop);
+    -webkit-backdrop-filter: var(--backdrop);
+    border-top: 1px solid var(--outline);
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.04);
+    z-index: 30;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px;
+  }
+  
+  .mobile-bottom-nav button {
+    background: transparent;
+    border: none;
+    box-shadow: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 0;
+    height: 100%;
+    width: 45%;
+    border-radius: 0;
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  
+  .mobile-bottom-nav button .material-symbols-outlined {
+    font-size: 24px;
+    transition: transform 0.2s ease;
+  }
+  
+  .mobile-bottom-nav button.active {
+    color: var(--primary);
+    background: transparent;
+  }
+  
+  .mobile-bottom-nav button.active .material-symbols-outlined {
+    transform: scale(1.1);
+    font-variation-settings: 'FILL' 1;
+  }
+  
+  /* Hide top tabs on mobile top bar */
+  header.topbar .top-tabs {
+    display: none !important;
+  }
+  
+  /* Extra space at bottom of pages to avoid content being covered by bottom nav */
+  .main-col {
+    padding-bottom: 90px;
+  }
+}
+
+/* Compact header buttons on small screens during exam mode */
+@media (max-width: 600px) {
+  header.topbar button span:not(.material-symbols-outlined) {
+    display: none;
+  }
+  header.topbar button {
+    padding: 8px 10px;
+    min-width: auto;
+    border-radius: 8px;
+  }
+  header.topbar {
+    gap: 6px;
+  }
+}
+
+/* Hide bottom nav during exams */
+body.exam-mode .mobile-bottom-nav {
+  display: none !important;
+}
