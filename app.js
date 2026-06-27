@@ -7,7 +7,7 @@ import { renderStats, showStatScreen, buildReportText } from './js/modules/stats
 
 async function loadQuestions() {
   try {
-    const res = await fetch(DATA_URL, { cache: "no-store" });
+    const res = await fetch(DATA_URL);
     if (!res.ok) throw new Error("HTTP " + res.status);
     let data = await res.json();
     if (!data) throw new Error("Dữ liệu trống");
