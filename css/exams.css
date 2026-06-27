@@ -1,0 +1,183 @@
+/* ===== Exam list (Làm bài tab) ===== */
+.exam-list-intro {
+  margin-bottom: 24px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.exam-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.exam-card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--elev-1);
+  border: 1px solid var(--outline);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.exam-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: var(--glow-primary), var(--elev-2);
+}
+.exam-card h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.exam-card .sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+  width: fit-content;
+}
+.status-badge .material-symbols-outlined {
+  font-size: 14px;
+}
+.status-badge.not_started {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--ink-soft);
+  border: 1px solid var(--outline);
+}
+.status-badge.in_progress {
+  background: var(--amber-light);
+  color: var(--amber-dark);
+  border: 1px solid rgba(217, 119, 6, 0.15);
+}
+.status-badge.done {
+  background: var(--green-light);
+  color: var(--green-dark);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.exam-card .score-line {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+.exam-card .score-line b {
+  color: var(--ink);
+}
+
+/* ===== Drill-down: Levels view list ===== */
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.level-card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--elev-1);
+  border: 1px solid var(--outline);
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.level-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: var(--glow-primary), var(--elev-2);
+}
+.level-card .lc-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.level-card .lc-top .material-symbols-outlined {
+  color: var(--primary);
+  font-size: 26px;
+  text-shadow: 0 0 8px rgba(99, 102, 241, 0.2);
+}
+.level-card h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.level-card .lc-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.level-card .lc-progress-bg {
+  background: rgba(0, 0, 0, 0.05);
+  height: 8px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.level-card .lc-progress-fill {
+  background: linear-gradient(90deg, var(--green), #34d399);
+  height: 100%;
+  border-radius: var(--radius-pill);
+}
+.level-card .lc-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.level-card .lc-arrow {
+  color: var(--primary);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.2s ease;
+}
+.level-card:hover .lc-arrow {
+  transform: translateX(3px);
+}
+
+.back-link {
+  background: transparent;
+  color: var(--primary);
+  border: none;
+  box-shadow: none;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.back-link:hover {
+  text-decoration: underline;
+  background: transparent;
+}
+.level-detail-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.level-detail-title .material-symbols-outlined {
+  color: var(--primary);
+}

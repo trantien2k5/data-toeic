@@ -1,0 +1,180 @@
+/* ===== Top app bar ===== */
+header.topbar {
+  background: var(--surface);
+  backdrop-filter: var(--backdrop);
+  -webkit-backdrop-filter: var(--backdrop);
+  border-bottom: 1px solid var(--outline);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+header.topbar h1 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
+}
+header.topbar h1 .material-symbols-outlined {
+  color: var(--primary);
+  font-size: 25px;
+  text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.top-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--outline);
+}
+.top-tabs button {
+  background: transparent;
+  color: var(--ink-soft);
+  padding: 8px 18px;
+  font-size: 13px;
+  border-radius: 9px;
+  box-shadow: none;
+}
+.top-tabs button.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  box-shadow: var(--glow-primary);
+}
+
+#timer {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--red-dark);
+  background: var(--red-light);
+  border: 1px solid rgba(244, 63, 94, 0.15);
+  padding: 7px 14px;
+  border-radius: 10px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.05);
+  transition: background-color 0.3s ease;
+}
+#timer .material-symbols-outlined {
+  font-size: 18px;
+}
+#exit-exam-btn {
+  display: none;
+}
+
+.app-body {
+  display: flex;
+  max-width: 1100px;
+  margin: 0 auto;
+  align-items: flex-start;
+  transition: max-width 0.25s ease;
+}
+.main-col {
+  flex: 1;
+  min-width: 0;
+  padding: 30px 20px 100px;
+}
+
+/* ===== Focus mode: full-screen exam-taking ===== */
+body.exam-mode .top-tabs,
+body.exam-mode header.topbar h1 span:not(.material-symbols-outlined),
+body.exam-mode header.topbar h1 {
+  display: none;
+}
+body.exam-mode header.topbar {
+  justify-content: flex-end;
+}
+body.exam-mode .app-body {
+  max-width: 1280px;
+}
+body.exam-mode .main-col {
+  padding-top: 28px;
+}
+.screen {
+  display: none;
+}
+.screen.active {
+  display: block;
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.screen-stat {
+  display: none;
+}
+.screen-stat.active {
+  display: block;
+  animation: fadeIn 0.3s ease-out;
+}
+.tabview {
+  display: none;
+}
+.tabview.active {
+  display: block;
+}
+
+/* ===== Custom confirmation Modal dialog ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  animation: modal-fade-in 0.2s ease-out;
+}
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal-box {
+  background: var(--modal-bg);
+  border-radius: var(--radius-md);
+  padding: 26px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--outline);
+}
+.modal-message {
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.6;
+  margin: 0 0 24px;
+  white-space: pre-line;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* Hide bottom nav during exams */
+body.exam-mode .mobile-bottom-nav {
+  display: none !important;
+}
