@@ -19,11 +19,11 @@
     <button data-tab="exams" class="active"><span class="material-symbols-outlined">edit_note</span> Làm bài</button>
     <button data-tab="stats"><span class="material-symbols-outlined">bar_chart</span> Thống kê</button>
   </div>
-  <button id="exit-exam-btn" class="btn-outline btn-sm"><span class="material-symbols-outlined">logout</span> Thoát đề</button>
-  <button id="btn-toggle-view" class="btn-outline btn-sm" style="display:none;"><span class="material-symbols-outlined">view_list</span> Xem danh sách câu hỏi</button>
+  <button id="exit-exam-btn" class="btn-outline btn-sm" title="Thoát đề"><span class="material-symbols-outlined">logout</span><span class="btn-label">Thoát đề</span></button>
+  <button id="btn-toggle-view" class="btn-outline btn-sm" style="display:none;" title="Xem danh sách câu hỏi"><span class="material-symbols-outlined">view_list</span><span class="btn-label">Xem danh sách câu hỏi</span></button>
   <button id="btn-fullscreen" class="btn-outline btn-sm desktop-only" title="Bật/tắt toàn màn hình"><span class="material-symbols-outlined">fullscreen</span></button>
   <div id="timer" style="display:none;"><span class="material-symbols-outlined">timer</span> 00:00</div>
-  <button id="btn-submit" class="btn-success btn-sm" style="display:none;"><span class="material-symbols-outlined">task_alt</span> Nộp bài</button>
+  <button id="btn-submit" class="btn-success btn-sm" style="display:none;" title="Nộp bài"><span class="material-symbols-outlined">task_alt</span><span class="btn-label">Nộp bài</span></button>
 </header>
 
 <div class="app-body">
@@ -64,11 +64,12 @@
         </div>
 
         <div class="q-card-col">
-          <div class="progress-wrap mobile-checklist" style="margin-bottom:14px;">
-            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);">
+          <div class="progress-wrap mobile-checklist" style="margin-bottom:14px;" id="mobile-checklist">
+            <button type="button" class="mobile-checklist-toggle" id="mobile-checklist-toggle">
               <span>Câu <b id="cur-num-m">1</b>/<span id="total-num-m">0</span></span>
               <span id="answered-count-m">Đã làm: 0</span>
-            </div>
+              <span class="material-symbols-outlined mc-chevron">expand_more</span>
+            </button>
             <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill-m" style="width:0%"></div></div>
             <div class="nav-grid" id="nav-grid-m"></div>
           </div>

@@ -48,6 +48,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
@@ -1390,8 +1391,60 @@ table.exam-table tr:last-child td {
     padding: 10px 18px;
     font-size: 13px;
   }
+  /* Buttons inside fixed/sticky bars don't need blur — it's the main cause
+     of mobile scroll jank since the backdrop has to be repainted every frame */
+  .btn-outline {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  /* Icon-only buttons in the top toolbar to keep it compact */
+  header.topbar .btn-label {
+    display: none;
+  }
+  header.topbar button.btn-sm {
+    padding: 8px 10px;
+    min-width: auto;
+  }
+  header.topbar {
+    gap: 6px;
+  }
+  #timer {
+    padding: 7px 10px;
+  }
+
+  /* Collapsible question-number grid */
+  .mobile-checklist-toggle {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    box-shadow: none;
+  }
+  .mc-chevron {
+    font-size: 20px;
+    color: var(--ink-soft);
+    transition: transform 0.2s ease;
+  }
+  .mobile-checklist.open .mc-chevron {
+    transform: rotate(180deg);
+  }
   .mobile-checklist .nav-grid {
     grid-template-columns: repeat(8, 1fr);
+    display: none;
+  }
+  .mobile-checklist.open .nav-grid {
+    display: grid;
+  }
+  .mobile-checklist .nav-dot {
+    font-size: 11.5px;
   }
   .score-ring {
     width: 114px;
@@ -1479,20 +1532,6 @@ table.exam-table tr:last-child td {
   }
 }
 
-/* Compact header buttons on small screens during exam mode */
-@media (max-width: 600px) {
-  header.topbar button span:not(.material-symbols-outlined) {
-    display: none;
-  }
-  header.topbar button {
-    padding: 8px 10px;
-    min-width: auto;
-    border-radius: 8px;
-  }
-  header.topbar {
-    gap: 6px;
-  }
-}
 
 /* Hide bottom nav during exams */
 body.exam-mode .mobile-bottom-nav {

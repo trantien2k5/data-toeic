@@ -95,6 +95,11 @@ function initEventListeners() {
   // View toggle
   el('btn-toggle-view').addEventListener('click', toggleView);
 
+  // Collapsible mobile question-number grid
+  el('mobile-checklist-toggle').addEventListener('click', () => {
+    el('mobile-checklist').classList.toggle('open');
+  });
+
   // Submit exam
   el('btn-submit').addEventListener('click', () => {
     const answered = Object.keys(state.userAnswers).length;
