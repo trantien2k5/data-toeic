@@ -506,14 +506,17 @@ export function buildReportText() {
   const lifetimeCorrect = history.reduce((s, h) => s + h.correct, 0);
   const lifetimeAccuracy = lifetimeTotal > 0 ? Math.round(lifetimeCorrect / lifetimeTotal * 100) : 0;
   const streak = state.progress.streak || { current: 0, best: 0 };
+  const progressPct = examIds.length > 0 ? Math.round(completed / examIds.length * 100) : 0;
+  const readiness = Math.round(progressPct * 0.4 + accuracy * 0.6);
 
   lines.push('--- TỔNG QUAN ---');
-  lines.push('Đề đã hoàn thành: ' + completed + '/' + examIds.length);
+  lines.push('Tổng tiến độ (đề đã hoàn thành): ' + progressPct + '% (' + completed + '/' + examIds.length + ')');
   lines.push('Lượt làm bài: ' + totalAttempts);
   lines.push('Tổng câu đã trả lời (lần gần nhất mỗi đề): ' + totalAnswered);
   lines.push('Độ chính xác hiện tại (lần gần nhất mỗi đề): ' + accuracy + '%');
   lines.push('Độ chính xác lịch sử (toàn bộ các lượt đã làm): ' + lifetimeAccuracy + '%');
   lines.push('Streak đúng liên tiếp: ' + streak.current + ' (kỷ lục: ' + streak.best + ')');
+  lines.push('Độ sẵn sàng TOEIC (dự đoán, kết hợp tiến độ + độ chính xác): ' + readiness + '% — ước tính ' + Math.round(accuracy / 100 * 30) + '/30 câu nếu gặp dạng này trong Part 5.');
   lines.push('');
 
   lines.push('--- THEO TỪ LOẠI ---');
@@ -565,7 +568,10 @@ export function buildReportText() {
       const members = familyGroups[family];
       const totalCorrect = members.reduce((s, w) => s + w.correct, 0);
       const totalWrong = members.reduce((s, w) => s + w.wrong, 0);
-      const memberText = members.map(w => w.word + ' (' + w.correct + 'đ/' + w.wrong + 's)').join(', ');
+      const memberText = members.map(w => {
+        const cat = w.correctAnswer ? CATEGORY_LABEL[ANSWER_TO_CATEGORY[w.correctAnswer]] : null;
+        return w.word + (cat ? ' [' + cat + ']' : '') + ' (' + w.correct + 'đ/' + w.wrong + 's)';
+      }).join(', ');
       lines.push(family + ' [Đúng ' + totalCorrect + ' / Sai ' + totalWrong + ']: ' + memberText);
     });
   }
@@ -585,7 +591,8 @@ export function buildReportText() {
     const p = getExamProgress(exam.id);
     const statusText = p.status === 'done' ? 'Hoàn thành' : p.status === 'in_progress' ? 'Đang làm' : 'Chưa làm';
     const scoreText = p.attempts > 0 ? p.lastCorrect + '/' + p.lastTotal + ' (' + p.lastPercent + '%), cao nhất ' + p.bestPercent + '%' : 'chưa làm';
-    lines.push(exam.title + ' [' + exam.level + '] - ' + statusText + ' - Lượt làm: ' + p.attempts + ' - Điểm: ' + scoreText);
+    const stableText = isExamStable(exam.id) ? ' - Ổn định ✓ (≥90% trong 3 lượt gần nhất)' : '';
+    lines.push(exam.title + ' [' + exam.level + '] - ' + statusText + ' - Lượt làm: ' + p.attempts + ' - Điểm: ' + scoreText + stableText);
   });
   lines.push('');
 
@@ -601,6 +608,19 @@ export function buildReportText() {
       lines.push((i + 1) + '. ' + w.word + ' (' + (w.meaning || '—') + ') - Sai: ' + w.wrong + ', Đúng: ' + w.correct + ', Tỉ lệ đúng: ' + pct + '%');
     });
     if (words.length > 15) lines.push('... và ' + (words.length - 15) + ' từ khác (xem đầy đủ trong tab Thống kê).');
+  }
+  lines.push('');
+
+  lines.push('--- PHÂN TÍCH NHẦM LẪN (top 20, bạn hay chọn nhầm sang từ loại nào) ---');
+  const confusionRows = buildConfusionRows();
+  if (confusionRows.length === 0) {
+    lines.push('Chưa có dữ liệu.');
+  } else {
+    confusionRows.slice(0, 20).forEach((w, i) => {
+      const correctCat = CATEGORY_LABEL[ANSWER_TO_CATEGORY[w.correctAnswer]] || '—';
+      const pickCat = CATEGORY_LABEL[ANSWER_TO_CATEGORY[w.topPickId]] || w.topPickId;
+      lines.push((i + 1) + '. ' + w.word + ' (' + (w.meaning || '—') + ') - Đúng là: ' + correctCat + ' - Hay chọn nhầm: ' + pickCat + ' (' + w.topPickCount + ' lần)');
+    });
   }
   lines.push('');
 
