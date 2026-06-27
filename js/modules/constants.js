@@ -26,6 +26,41 @@ export const ANSWER_OPTIONS = [
   { id: "D", text: "Trạng từ (Adverb)" },
 ];
 
+// Chỉ có 30 mẫu giải thích hậu tố/quy tắc lặp lại trên toàn bộ 400 câu —
+// file dữ liệu lưu index vào đây (trường "r") thay vì lặp lại cả câu chữ.
+export const REASONS = [
+  "Hậu tố '-sion' thường tạo thành danh từ.",
+  "Hậu tố '-ment' thường tạo thành danh từ.",
+  "Hậu tố '-tion' thường tạo thành danh từ.",
+  "Hậu tố '-ness' thường tạo thành danh từ.",
+  "Hậu tố '-ity' thường tạo thành danh từ.",
+  "Hậu tố '-ance' thường tạo thành danh từ.",
+  "Hậu tố '-ence' thường tạo thành danh từ.",
+  "Hậu tố '-er' thường tạo thành danh từ.",
+  "Hậu tố '-or' thường tạo thành danh từ.",
+  "Hậu tố '-ee' thường tạo thành danh từ.",
+  "Đây là động từ gốc, không có hậu tố đặc biệt, thường gặp trong TOEIC.",
+  "Hậu tố '-ful' thường tạo thành tính từ.",
+  "Hậu tố '-able' thường tạo thành tính từ.",
+  "Hậu tố '-al' thường tạo thành tính từ.",
+  "Hậu tố '-ible' thường tạo thành tính từ.",
+  "Hậu tố '-less' thường tạo thành tính từ.",
+  "Hậu tố '-ive' thường tạo thành tính từ.",
+  "Hậu tố '-ous' thường tạo thành tính từ.",
+  "Hậu tố '-ic' thường tạo thành tính từ.",
+  "Hậu tố '-ed' thường tạo thành tính từ.",
+  "Hậu tố '-ing' thường tạo thành tính từ.",
+  "Hậu tố '-ly' thường tạo thành trạng từ.",
+  "Hậu tố '-th' thường tạo thành danh từ.",
+  "Hậu tố '-dom' thường tạo thành danh từ.",
+  "Hậu tố '-ship' thường tạo thành danh từ.",
+  "Hậu tố '-ify' thường tạo thành động từ.",
+  "Hậu tố '-ate' thường tạo thành động từ.",
+  "Hậu tố '-en' thường tạo thành động từ.",
+  "Đây là tính từ, cần ghi nhớ vì không theo hậu tố quen thuộc.",
+  "Đây là danh từ gốc, thường gặp trong văn cảnh kinh doanh/TOEIC.",
+];
+
 export const ICON = {
   done: 'check_circle', 
   in_progress: 'pending', 

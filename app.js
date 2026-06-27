@@ -1,4 +1,4 @@
-import { DATA_URL, QUESTIONS_PER_EXAM, ANSWER_TO_CATEGORY, ANSWER_OPTIONS } from './js/modules/constants.js';
+import { DATA_URL, QUESTIONS_PER_EXAM, ANSWER_TO_CATEGORY, ANSWER_OPTIONS, REASONS } from './js/modules/constants.js';
 import { state } from './js/modules/state.js';
 import { el, showScreen, showTab, initFullscreen, onTabChange, showConfirm, showAlert, shuffle, getSuffix } from './js/modules/utils.js';
 import { loadProgress, exportProgressJSON, mergeProgressJSON } from './js/modules/storage.js';
@@ -15,7 +15,6 @@ async function loadQuestions() {
     // File dữ liệu chỉ lưu phần riêng biệt của mỗi câu; "question", "options" và
     // "explanation.correct" giống nhau ở mọi câu nên được sinh lại ở đây.
     state.ALL_QUESTIONS = data.map(q => ({
-      id: q.id,
       word: q.word,
       meaning: q.meaning,
       question: 'Từ "' + q.word + '" thuộc từ loại nào?',
@@ -23,7 +22,7 @@ async function loadQuestions() {
       correctAnswer: q.correctAnswer,
       explanation: {
         correct: q.word + ' là ' + ANSWER_OPTIONS.find(o => o.id === q.correctAnswer).text + '.',
-        reason: q.reason,
+        reason: REASONS[q.r],
         example: q.example,
       },
       family: q.family || q.word,
