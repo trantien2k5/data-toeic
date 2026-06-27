@@ -7,6 +7,9 @@
 .sidebar-checklist {
   display: none;
 }
+.mobile-checklist {
+  margin-bottom: 14px;
+}
 .progress-wrap {
   background: var(--surface);
   border-radius: var(--radius-md);
@@ -40,6 +43,7 @@
 .progress-bar-fill {
   background: linear-gradient(90deg, var(--primary), var(--accent-light));
   height: 100%;
+  width: 0;
   border-radius: var(--radius-pill);
   box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);

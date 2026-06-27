@@ -204,3 +204,28 @@ button:disabled {
   color: var(--ink-soft);
   font-size: 15px;
 }
+
+/* ===== Shared utility classes ===== */
+/* Initial hidden state — JS always sets el.style.display explicitly when
+   toggling visibility, which overrides this class either way. */
+.hidden {
+  display: none;
+}
+
+/* "Không có dữ liệu" hint text reused across stats/review sections */
+.hint-empty {
+  display: none;
+  text-align: center;
+  color: var(--ink-soft);
+  padding: 18px 0;
+}
+.hint-empty.lg {
+  padding: 24px 0;
+}
+.hint-note {
+  display: none;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  padding: 8px 0;
+}

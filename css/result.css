@@ -203,6 +203,17 @@
   gap: 12px;
   margin-top: 26px;
 }
+.bottom-actions.result {
+  margin-top: 0;
+  margin-bottom: 22px;
+}
+.bottom-actions.left {
+  margin: 0 0 16px;
+  justify-content: flex-start;
+}
+.bottom-actions.footer {
+  margin-top: 28px;
+}
 
 .review-filter {
   display: flex;
