@@ -24,6 +24,7 @@ export function loadProgress() {
     state.progress.timeStats = {};
     TIME_BUCKETS.forEach(b => { state.progress.timeStats[b.key] = 0; });
   }
+  if (!state.progress.streak) state.progress.streak = { current: 0, best: 0 };
 }
 
 export function saveProgress() {
@@ -171,14 +172,33 @@ export function mergeProgressJSON(imported) {
         }
         
         if (!newWordStats[d.word]) {
-          newWordStats[d.word] = { word: d.word, meaning: d.meaning, correct: 0, wrong: 0, skip: 0 };
+          newWordStats[d.word] = {
+            word: d.word, meaning: d.meaning, correct: 0, wrong: 0, skip: 0,
+            correctAnswer: d.correctAnswer, wrongPicks: {},
+          };
         }
         const status = d.status;
         newWordStats[d.word][status === 'correct' ? 'correct' : status === 'wrong' ? 'wrong' : 'skip']++;
+        if (status === 'wrong' && d.userPick) {
+          newWordStats[d.word].wrongPicks[d.userPick] = (newWordStats[d.word].wrongPicks[d.userPick] || 0) + 1;
+        }
       });
     }
   });
-  
+
+  // Tính lại streak (đúng liên tiếp) theo thứ tự thời gian tăng dần
+  let streakCurrent = 0, streakBest = 0;
+  [...mergedHistory].reverse().forEach(h => {
+    (h.details || []).forEach(d => {
+      if (d.status === 'correct') {
+        streakCurrent++;
+        streakBest = Math.max(streakBest, streakCurrent);
+      } else {
+        streakCurrent = 0;
+      }
+    });
+  });
+
   // Gộp timeStats bằng cách lấy giá trị lớn nhất của từng bucket
   const newTimeStats = {};
   TIME_BUCKETS.forEach(b => {
@@ -192,7 +212,9 @@ export function mergeProgressJSON(imported) {
   state.progress.categoryStats = newCategoryStats;
   state.progress.wordStats = newWordStats;
   state.progress.timeStats = newTimeStats;
-  
+  state.progress.streak = { current: streakCurrent, best: streakBest };
+
+
   saveProgress();
   showAlert("Gộp tiến trình thành công! Hệ thống sẽ tự động tải lại trang.").then(() => {
     window.location.reload();

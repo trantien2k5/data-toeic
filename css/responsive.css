@@ -28,6 +28,9 @@
   .stats-overview {
     grid-template-columns: repeat(2, 1fr);
   }
+  .hero-stats {
+    grid-template-columns: 1fr;
+  }
   .exam-grid {
     grid-template-columns: 1fr;
   }

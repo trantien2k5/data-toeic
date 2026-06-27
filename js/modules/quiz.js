@@ -337,6 +337,10 @@ export function finishExam() {
   let correct = 0, wrong = 0, skip = 0;
   const details = [];
 
+  if (!state.progress.streak) state.progress.streak = { current: 0, best: 0 };
+  let streakCurrent = state.progress.streak.current;
+  let streakBest = state.progress.streak.best;
+
   state.runQuestions.forEach((q, i) => {
     const userPick = state.userAnswers[i];
     const category = ANSWER_TO_CATEGORY[q.correctAnswer];
@@ -345,24 +349,37 @@ export function finishExam() {
     }
 
     let status;
-    if (userPick === undefined) { 
-      status = 'skip'; 
-      skip++; 
+    if (userPick === undefined) {
+      status = 'skip';
+      skip++;
+      streakCurrent = 0;
     } else if (userPick === q.correctAnswer) {
-      status = 'correct'; 
+      status = 'correct';
       correct++;
       if (category && state.progress.categoryStats[category]) {
         state.progress.categoryStats[category].correct++;
       }
-    } else { 
-      status = 'wrong'; 
-      wrong++; 
+      streakCurrent++;
+      streakBest = Math.max(streakBest, streakCurrent);
+    } else {
+      status = 'wrong';
+      wrong++;
+      streakCurrent = 0;
     }
 
-    if (!state.progress.wordStats[q.word]) {
-      state.progress.wordStats[q.word] = { word: q.word, meaning: q.meaning, correct: 0, wrong: 0, skip: 0 };
+    let ws = state.progress.wordStats[q.word];
+    if (!ws) {
+      ws = state.progress.wordStats[q.word] = {
+        word: q.word, meaning: q.meaning, correct: 0, wrong: 0, skip: 0,
+        correctAnswer: q.correctAnswer, wrongPicks: {},
+      };
     }
-    state.progress.wordStats[q.word][status === 'correct' ? 'correct' : status === 'wrong' ? 'wrong' : 'skip']++;
+    if (!ws.wrongPicks) ws.wrongPicks = {};
+    if (!ws.correctAnswer) ws.correctAnswer = q.correctAnswer;
+    ws[status === 'correct' ? 'correct' : status === 'wrong' ? 'wrong' : 'skip']++;
+    if (status === 'wrong') {
+      ws.wrongPicks[userPick] = (ws.wrongPicks[userPick] || 0) + 1;
+    }
 
     if (status !== 'skip' && typeof state.answerTimeSec[i] === 'number') {
       const bucketKey = getTimeBucketKey(state.answerTimeSec[i]);
@@ -374,6 +391,9 @@ export function finishExam() {
       correctAnswer: q.correctAnswer, explanation: q.explanation, userPick, status,
     });
   });
+
+  state.progress.streak.current = streakCurrent;
+  state.progress.streak.best = streakBest;
 
   const total = state.runQuestions.length;
   const pct = total ? Math.round((correct / total) * 100) : 0;

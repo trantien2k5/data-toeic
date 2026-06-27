@@ -142,6 +142,24 @@
 
   <!-- TAB: STATISTICS -->
   <div class="tabview" id="tab-stats">
+    <div class="hero-stats">
+      <div class="hero-card">
+        <div class="hero-label">Tổng tiến độ</div>
+        <div class="cat-bar-bg"><div class="cat-bar-fill" id="hero-progress-fill" style="width:0%"></div></div>
+        <div class="hero-value" id="hero-progress-pct">0%</div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-label">Streak (đúng liên tiếp)</div>
+        <div class="hero-value"><span id="hero-streak-current">0</span></div>
+        <div class="hero-sub">Kỷ lục: <b id="hero-streak-best">0</b></div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-label">Độ sẵn sàng TOEIC (dự đoán)</div>
+        <div class="hero-value" id="hero-readiness">0%</div>
+        <div class="hero-sub">Part 5 ước tính: <b id="hero-readiness-predict">0/30</b> câu</div>
+      </div>
+    </div>
+
     <div class="stats-overview">
       <div class="stat-box"><div class="v" id="ov-completed">0/5</div><div class="l">Đề đã hoàn thành</div></div>
       <div class="stat-box"><div class="v" id="ov-attempts">0</div><div class="l">Lượt làm bài</div></div>
@@ -200,6 +218,17 @@
       <div id="study-plan-content"></div>
     </div>
 
+    <div class="screen-stat" id="stat-detail-confusion">
+      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
+      <h2 class="level-detail-title"><span class="material-symbols-outlined">psychology_alt</span> Phân tích nhầm lẫn</h2>
+      <p class="exam-list-intro">Với mỗi từ bạn hay sai, đây là từ loại bạn thường chọn nhầm nhất — giúp thấy rõ kiểu nhầm lẫn (vd: hay nhầm Động từ thành Danh từ) thay vì chỉ biết đúng/sai.</p>
+      <table class="exam-table" id="confusion-table">
+        <thead><tr><th>Từ</th><th>Nghĩa</th><th>Đúng là</th><th>Bạn hay chọn nhầm</th></tr></thead>
+        <tbody id="confusion-body"></tbody>
+      </table>
+      <p id="confusion-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
+    </div>
+
     <div class="screen-stat" id="stat-detail-exams">
       <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
       <h2 class="level-detail-title"><span class="material-symbols-outlined">table_chart</span> Theo từng đề</h2>
@@ -225,6 +254,8 @@
     <div class="screen-stat" id="stat-detail-history">
       <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
       <h2 class="level-detail-title"><span class="material-symbols-outlined">history</span> Lịch sử làm bài</h2>
+      <p class="exam-list-intro">Xu hướng 10 lượt gần nhất (trái = cũ nhất, phải = mới nhất) — xem bạn đang tiến bộ hay chững lại.</p>
+      <div class="trend-row" id="history-trend"></div>
       <table class="exam-table" id="history-table">
         <thead><tr><th>Thời gian</th><th>Đề</th><th>Level</th><th>Điểm</th><th>Đúng/Sai/Bỏ trống</th><th></th></tr></thead>
         <tbody id="history-body"></tbody>

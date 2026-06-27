@@ -44,6 +44,8 @@ export function renderStats() {
   el('ov-accuracy').textContent = (totalAnswered > 0 ? Math.round(totalCorrect / totalAnswered * 100) : 0) + '%';
   el('ov-answered').textContent = totalAnswered;
 
+  renderHeroStats(completed, examIds.length, totalAnswered, totalCorrect);
+
   const catWrap = el('cat-stats');
   catWrap.innerHTML = '';
   Object.keys(CATEGORY_LABEL).forEach(cat => {
@@ -58,6 +60,7 @@ export function renderStats() {
   });
 
   renderWorstWords();
+  renderConfusion();
   renderHistory();
   renderLevelAccuracy();
   renderSuffixStats();
@@ -66,6 +69,56 @@ export function renderStats() {
   renderStudyPlan();
   renderStatsHome();
   showStatScreen('stat-home');
+}
+
+// Tổng tiến độ + streak (đúng liên tiếp) + điểm sẵn sàng TOEIC dự đoán —
+// kết hợp tỉ lệ hoàn thành đề và độ chính xác chung thành một chỉ số tổng quát.
+export function renderHeroStats(completedExams, totalExams, totalAnswered, totalCorrect) {
+  const progressPct = totalExams > 0 ? Math.round(completedExams / totalExams * 100) : 0;
+  el('hero-progress-fill').style.width = progressPct + '%';
+  el('hero-progress-pct').textContent = progressPct + '%';
+
+  const streak = state.progress.streak || { current: 0, best: 0 };
+  el('hero-streak-current').textContent = streak.current;
+  el('hero-streak-best').textContent = streak.best;
+
+  const accuracyPct = totalAnswered > 0 ? Math.round(totalCorrect / totalAnswered * 100) : 0;
+  const readiness = Math.round(progressPct * 0.4 + accuracyPct * 0.6);
+  el('hero-readiness').textContent = readiness + '%';
+  el('hero-readiness-predict').textContent = Math.round(accuracyPct / 100 * 30) + '/30';
+}
+
+// Với mỗi từ bị sai, tìm đáp án bạn hay chọn nhầm nhất — giúp thấy rõ kiểu
+// nhầm lẫn (vd: hay nhầm Verb thành Noun) thay vì chỉ biết đúng/sai.
+export function buildConfusionRows() {
+  return Object.values(state.progress.wordStats || {})
+    .filter(w => w.wrongPicks && Object.values(w.wrongPicks).some(n => n > 0))
+    .map(w => {
+      const [topPickId, topPickCount] = Object.entries(w.wrongPicks).sort((a, b) => b[1] - a[1])[0];
+      return { ...w, topPickId, topPickCount };
+    })
+    .sort((a, b) => b.topPickCount - a.topPickCount);
+}
+
+export function renderConfusion() {
+  const rows = buildConfusionRows().slice(0, 20);
+
+  const tbody = el('confusion-body');
+  tbody.innerHTML = '';
+  rows.forEach(w => {
+    const correctCat = CATEGORY_LABEL[ANSWER_TO_CATEGORY[w.correctAnswer]] || '—';
+    const pickCat = CATEGORY_LABEL[ANSWER_TO_CATEGORY[w.topPickId]] || w.topPickId;
+    const row = document.createElement('tr');
+    row.innerHTML =
+      '<td><b>' + w.word + '</b></td>' +
+      '<td>' + (w.meaning || '—') + '</td>' +
+      '<td>' + correctCat + '</td>' +
+      '<td>' + pickCat + ' (' + w.topPickCount + ' lần)</td>';
+    tbody.appendChild(row);
+  });
+
+  el('confusion-table').style.display = rows.length > 0 ? 'table' : 'none';
+  el('confusion-empty').style.display = rows.length > 0 ? 'none' : 'block';
 }
 
 export function showStatScreen(id) {
@@ -82,6 +135,7 @@ export function renderStatsHome() {
 
   const familyCount = Object.keys(buildFamilyGroups()).length;
   const answeredWithTime = TIME_BUCKETS.reduce((s, b) => s + (state.progress.timeStats[b.key] || 0), 0);
+  const confusionCount = buildConfusionRows().length;
 
   const cards = [
     { id: 'stat-detail-category', icon: 'category', title: 'Theo từ loại', sub: 'Noun / Verb / Adjective / Adverb' },
@@ -89,6 +143,7 @@ export function renderStatsHome() {
     { id: 'stat-detail-suffix', icon: 'spellcheck', title: 'Theo hậu tố', sub: 'Quy tắc hậu tố bạn còn yếu' },
     { id: 'stat-detail-family', icon: 'account_tree', title: 'Theo Word Family', sub: familyCount + ' nhóm từ cùng gốc' },
     { id: 'stat-detail-time', icon: 'timer', title: 'Theo thời gian trả lời', sub: answeredWithTime + ' câu đã đo thời gian' },
+    { id: 'stat-detail-confusion', icon: 'psychology_alt', title: 'Phân tích nhầm lẫn', sub: confusionCount + ' từ hay bị nhầm từ loại' },
     { id: 'stat-detail-exams', icon: 'table_chart', title: 'Theo từng đề', sub: completedExams + '/' + examIds.length + ' đề hoàn thành' },
     { id: 'stat-detail-worst', icon: 'trending_down', title: 'Từ sai nhiều nhất', sub: wrongWordsCount + ' từ cần ôn lại' },
     { id: 'stat-detail-history', icon: 'history', title: 'Lịch sử làm bài', sub: historyCount + ' lượt đã làm' },
@@ -110,8 +165,26 @@ export function renderStatsHome() {
   });
 }
 
+// Xu hướng điểm số của 10 lượt gần nhất (trái = cũ nhất, phải = mới nhất) —
+// giúp thấy ngay đang tiến bộ hay chững lại, không cần đọc cả bảng lịch sử.
+export function renderTrend() {
+  const history = state.progress.history || [];
+  const recent = history.slice(0, 10).reverse();
+  const wrap = el('history-trend');
+  wrap.innerHTML = '';
+  wrap.style.display = recent.length > 0 ? 'flex' : 'none';
+  recent.forEach(h => {
+    const bar = document.createElement('div');
+    bar.className = 'trend-bar ' + (h.percent >= 80 ? 'good' : h.percent >= 50 ? 'mid' : 'low');
+    bar.style.height = Math.max(8, h.percent) + '%';
+    bar.title = h.examTitle + ': ' + h.percent + '%';
+    wrap.appendChild(bar);
+  });
+}
+
 export function renderHistory() {
   const history = state.progress.history || [];
+  renderTrend();
   const tbody = el('history-body');
   tbody.innerHTML = '';
   const shown = history.slice(0, 30);
