@@ -57,7 +57,7 @@
 
 .stats-overview {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
   margin-bottom: 28px;
 }
@@ -282,6 +282,10 @@ table.exam-table tr:last-child td {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.family-member i {
+  color: var(--ink-soft);
+  font-size: 12px;
 }
 .family-member {
   display: flex;

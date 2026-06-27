@@ -4,6 +4,17 @@ import { el, formatDate, getSuffix, shuffle, showTab } from './utils.js';
 import { getExamProgress } from './storage.js';
 import { startExam, viewHistoryEntry } from './quiz.js';
 
+// Một đề "ổn định" khi ≥3 lượt làm gần nhất đều đạt ≥90% — phân biệt với
+// việc chỉ đạt điểm cao đúng 1 lần (có thể do may mắn) rồi không lặp lại được.
+const STABILITY_MIN_ATTEMPTS = 3;
+const STABILITY_THRESHOLD = 90;
+
+export function isExamStable(examId) {
+  const attempts = (state.progress.history || []).filter(h => h.examId === examId);
+  if (attempts.length < STABILITY_MIN_ATTEMPTS) return false;
+  return attempts.slice(0, STABILITY_MIN_ATTEMPTS).every(h => h.percent >= STABILITY_THRESHOLD);
+}
+
 export function renderStats() {
   const examIds = state.EXAMS.map(e => e.id);
   let completed = 0, totalAttempts = 0, totalAnswered = 0, totalCorrect = 0;
@@ -24,18 +35,20 @@ export function renderStats() {
       lastLevel = exam.level;
       const divider = document.createElement('tr');
       divider.className = 'level-divider-row';
-      divider.innerHTML = '<td colspan="5">' + exam.level + '</td>';
+      divider.innerHTML = '<td colspan="6">' + exam.level + '</td>';
       tbody.appendChild(divider);
     }
 
     const statusText = p.status === 'done' ? 'Hoàn thành' : p.status === 'in_progress' ? 'Đang làm' : 'Chưa làm';
+    const stable = isExamStable(exam.id);
     const row = document.createElement('tr');
     row.innerHTML =
       '<td>' + exam.title + '</td>' +
       '<td>' + statusText + '</td>' +
       '<td>' + p.attempts + '</td>' +
       '<td>' + (p.attempts > 0 ? p.lastCorrect + '/' + p.lastTotal + ' (' + p.lastPercent + '%)' : '—') + '</td>' +
-      '<td>' + (p.attempts > 0 ? p.bestPercent + '%' : '—') + '</td>';
+      '<td>' + (p.attempts > 0 ? p.bestPercent + '%' : '—') + '</td>' +
+      '<td>' + (stable ? '<span class="badge correct"><span class="material-symbols-outlined">verified</span> Ổn định</span>' : '—') + '</td>';
     tbody.appendChild(row);
   });
 
@@ -43,6 +56,16 @@ export function renderStats() {
   el('ov-attempts').textContent = totalAttempts;
   el('ov-accuracy').textContent = (totalAnswered > 0 ? Math.round(totalCorrect / totalAnswered * 100) : 0) + '%';
   el('ov-answered').textContent = totalAnswered;
+
+  // Accuracy "hiện tại" (ov-accuracy) chỉ tính trên lần làm gần nhất mỗi đề,
+  // nên 1 lượt timeout/nộp trắng gần đây có thể kéo tụt số này dù năng lực
+  // thật đã tốt hơn nhiều. Accuracy "lịch sử" cộng dồn TOÀN BỘ các lượt làm
+  // đã từng có, phản ánh đúng quá trình học hơn.
+  const lifetimeHistory = state.progress.history || [];
+  const lifetimeTotal = lifetimeHistory.reduce((s, h) => s + h.total, 0);
+  const lifetimeCorrect = lifetimeHistory.reduce((s, h) => s + h.correct, 0);
+  const lifetimeAccuracy = lifetimeTotal > 0 ? Math.round(lifetimeCorrect / lifetimeTotal * 100) : 0;
+  el('ov-accuracy-lifetime').textContent = lifetimeAccuracy + '%';
 
   renderHeroStats(completed, examIds.length, totalAnswered, totalCorrect);
 
@@ -60,6 +83,7 @@ export function renderStats() {
   });
 
   renderWorstWords();
+  renderBestWords();
   renderConfusion();
   renderHistory();
   renderLevelAccuracy();
@@ -146,6 +170,7 @@ export function renderStatsHome() {
     { id: 'stat-detail-confusion', icon: 'psychology_alt', title: 'Phân tích nhầm lẫn', sub: confusionCount + ' từ hay bị nhầm từ loại' },
     { id: 'stat-detail-exams', icon: 'table_chart', title: 'Theo từng đề', sub: completedExams + '/' + examIds.length + ' đề hoàn thành' },
     { id: 'stat-detail-worst', icon: 'trending_down', title: 'Từ sai nhiều nhất', sub: wrongWordsCount + ' từ cần ôn lại' },
+    { id: 'stat-detail-best', icon: 'military_tech', title: 'Từ đã thành thạo', sub: buildBestWordsRows().length + ' từ làm tốt' },
     { id: 'stat-detail-history', icon: 'history', title: 'Lịch sử làm bài', sub: historyCount + ' lượt đã làm' },
     { id: 'stat-detail-plan', icon: 'flag', title: 'Kế hoạch tiếp theo', sub: 'Bạn nên học gì tiếp theo?' },
     { id: 'stat-detail-sync', icon: 'sync', title: 'Đồng bộ dữ liệu', sub: 'Sao lưu & khôi phục tiến độ học tập' },
@@ -240,6 +265,33 @@ export function renderWorstWords() {
 
   el('worst-words-table').style.display = top.length > 0 ? 'table' : 'none';
   el('worst-words-empty').style.display = top.length > 0 ? 'none' : 'block';
+}
+
+// Đối xứng với "Từ sai nhiều nhất" — liệt kê các từ làm tốt nhất (đúng nhiều,
+// chưa sai lần nào) để tạo cảm giác tiến bộ, không chỉ thấy toàn điểm yếu.
+export function buildBestWordsRows() {
+  return Object.values(state.progress.wordStats || {})
+    .filter(w => w.correct >= 2 && w.wrong === 0)
+    .sort((a, b) => b.correct - a.correct);
+}
+
+export function renderBestWords() {
+  const top = buildBestWordsRows().slice(0, 15);
+
+  const tbody = el('best-words-body');
+  tbody.innerHTML = '';
+  top.forEach(w => {
+    const row = document.createElement('tr');
+    row.innerHTML =
+      '<td><b>' + w.word + '</b></td>' +
+      '<td>' + (w.meaning || '—') + '</td>' +
+      '<td>' + w.correct + '</td>' +
+      '<td>100%</td>';
+    tbody.appendChild(row);
+  });
+
+  el('best-words-table').style.display = top.length > 0 ? 'table' : 'none';
+  el('best-words-empty').style.display = top.length > 0 ? 'none' : 'block';
 }
 
 export function buildSuffixGroups() {
@@ -360,7 +412,8 @@ export function renderFamilyStats() {
     members.forEach(w => {
       const total = w.correct + w.wrong;
       const pct = total > 0 ? Math.round(w.correct / total * 100) : 0;
-      membersHtml += '<div class="family-member"><span>' + w.word + '</span><span>' + w.correct + ' đúng / ' + w.wrong + ' sai (' + pct + '%)</span></div>';
+      const category = w.correctAnswer ? CATEGORY_LABEL[ANSWER_TO_CATEGORY[w.correctAnswer]] : null;
+      membersHtml += '<div class="family-member"><span>' + w.word + (category ? ' <i>(' + category + ')</i>' : '') + '</span><span>' + w.correct + ' đúng / ' + w.wrong + ' sai (' + pct + '%)</span></div>';
     });
     card.innerHTML =
       '<div class="family-head"><b>' + family + '</b><span>Đúng: ' + totalCorrect + ' · Sai: ' + totalWrong + '</span></div>' +
@@ -448,12 +501,19 @@ export function buildReportText() {
     }
   });
   const accuracy = totalAnswered > 0 ? Math.round(totalCorrect / totalAnswered * 100) : 0;
+  const history = state.progress.history || [];
+  const lifetimeTotal = history.reduce((s, h) => s + h.total, 0);
+  const lifetimeCorrect = history.reduce((s, h) => s + h.correct, 0);
+  const lifetimeAccuracy = lifetimeTotal > 0 ? Math.round(lifetimeCorrect / lifetimeTotal * 100) : 0;
+  const streak = state.progress.streak || { current: 0, best: 0 };
 
   lines.push('--- TỔNG QUAN ---');
   lines.push('Đề đã hoàn thành: ' + completed + '/' + examIds.length);
   lines.push('Lượt làm bài: ' + totalAttempts);
   lines.push('Tổng câu đã trả lời (lần gần nhất mỗi đề): ' + totalAnswered);
-  lines.push('Độ chính xác chung: ' + accuracy + '%');
+  lines.push('Độ chính xác hiện tại (lần gần nhất mỗi đề): ' + accuracy + '%');
+  lines.push('Độ chính xác lịch sử (toàn bộ các lượt đã làm): ' + lifetimeAccuracy + '%');
+  lines.push('Streak đúng liên tiếp: ' + streak.current + ' (kỷ lục: ' + streak.best + ')');
   lines.push('');
 
   lines.push('--- THEO TỪ LOẠI ---');
@@ -544,8 +604,18 @@ export function buildReportText() {
   }
   lines.push('');
 
+  lines.push('--- TỪ ĐÃ THÀNH THẠO (top 15, đúng ≥2 lần, chưa sai lần nào) ---');
+  const bestWords = buildBestWordsRows();
+  if (bestWords.length === 0) {
+    lines.push('Chưa có dữ liệu.');
+  } else {
+    bestWords.slice(0, 15).forEach((w, i) => {
+      lines.push((i + 1) + '. ' + w.word + ' (' + (w.meaning || '—') + ') - Đúng: ' + w.correct + ' lần');
+    });
+  }
+  lines.push('');
+
   lines.push('--- LỊCH SỬ LÀM BÀI (20 lượt gần nhất) ---');
-  const history = state.progress.history || [];
   if (history.length === 0) {
     lines.push('Chưa có lượt làm bài nào.');
   } else {
