@@ -864,6 +864,7 @@ function renderStatsHome(){
     { id: 'stat-detail-worst', icon: 'trending_down', title: 'Từ sai nhiều nhất', sub: wrongWordsCount + ' từ cần ôn lại' },
     { id: 'stat-detail-history', icon: 'history', title: 'Lịch sử làm bài', sub: historyCount + ' lượt đã làm' },
     { id: 'stat-detail-plan', icon: 'flag', title: 'Kế hoạch tiếp theo', sub: 'Bạn nên học gì tiếp theo?' },
+    { id: 'stat-detail-sync', icon: 'sync', title: 'Đồng bộ dữ liệu', sub: 'Sao lưu & khôi phục tiến độ học tập' },
   ];
 
   const grid = el('stat-category-grid');
@@ -1303,6 +1304,196 @@ el('btn-export-report').addEventListener('click', () => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+});
+
+/* ---------- functions and event listeners for JSON backup sync ---------- */
+function exportProgressJSON() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    showAlert("Không tìm thấy dữ liệu tiến trình nào để sao lưu.");
+    return;
+  }
+  const blob = new Blob([raw], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const ts = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+    '_' + pad(now.getHours()) + 'h' + pad(now.getMinutes());
+  a.href = url;
+  a.download = 'toeic-progress-backup-' + ts + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function mergeProgressJSON(imported) {
+  if (!imported || typeof imported !== 'object') {
+    showAlert("File sao lưu không hợp lệ.");
+    return;
+  }
+  
+  if (!imported.history || !Array.isArray(imported.history)) {
+    showAlert("File sao lưu không đúng cấu trúc tiến trình học tập.");
+    return;
+  }
+
+  const localHistory = progress.history || [];
+  const importedHistory = imported.history || [];
+  
+  const mergedHistoryMap = new Map();
+  // Thêm lịch sử hiện tại
+  localHistory.forEach(h => {
+    if (h.date && h.examId) {
+      mergedHistoryMap.set(h.date + '_' + h.examId, h);
+    }
+  });
+  // Thêm lịch sử nhập vào (nếu trùng date + examId thì bỏ qua/không đè để tránh lặp)
+  importedHistory.forEach(h => {
+    if (h.date && h.examId) {
+      const key = h.date + '_' + h.examId;
+      if (!mergedHistoryMap.has(key)) {
+        mergedHistoryMap.set(key, h);
+      }
+    }
+  });
+  
+  const mergedHistory = Array.from(mergedHistoryMap.values());
+  mergedHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  if (mergedHistory.length > HISTORY_CAP) {
+    mergedHistory.length = HISTORY_CAP;
+  }
+  
+  // Dựng lại dữ liệu các đề thi (exams)
+  const updatedExams = {};
+  
+  // Giữ lại các đề đang làm dở (in_progress) ở cả local lẫn file import
+  Object.keys(progress.exams || {}).forEach(examId => {
+    const p = progress.exams[examId];
+    if (p.status === 'in_progress') {
+      updatedExams[examId] = { ...p };
+    }
+  });
+  Object.keys(imported.exams || {}).forEach(examId => {
+    const p = imported.exams[examId];
+    if (p.status === 'in_progress' && (!updatedExams[examId] || updatedExams[examId].status !== 'in_progress')) {
+      updatedExams[examId] = { ...p };
+    }
+  });
+
+  // Tính toán kết quả đề từ lịch sử đã gộp
+  EXAMS.forEach(exam => {
+    const examHistory = mergedHistory.filter(h => h.examId === exam.id);
+    if (examHistory.length > 0) {
+      const attempts = examHistory.length;
+      const bestPercent = Math.max(...examHistory.map(h => h.percent || 0));
+      const mostRecent = examHistory[0]; // Vì đã sort desc nên [0] là gần nhất
+      
+      updatedExams[exam.id] = {
+        status: "done",
+        attempts,
+        lastPercent: mostRecent.percent,
+        lastCorrect: mostRecent.correct,
+        lastTotal: mostRecent.total,
+        bestPercent
+      };
+    } else {
+      if (!updatedExams[exam.id]) {
+        updatedExams[exam.id] = {
+          status: "not_started",
+          attempts: 0,
+          lastPercent: null,
+          lastCorrect: 0,
+          lastTotal: 0,
+          bestPercent: 0
+        };
+      }
+    }
+  });
+  
+  // Khởi dựng lại categoryStats & wordStats dựa trên chi tiết lịch sử đã gộp
+  const newCategoryStats = {
+    N: { correct: 0, total: 0 },
+    V: { correct: 0, total: 0 },
+    ADJ: { correct: 0, total: 0 },
+    ADV: { correct: 0, total: 0 }
+  };
+  const newWordStats = {};
+  
+  mergedHistory.forEach(h => {
+    if (h.details && Array.isArray(h.details)) {
+      h.details.forEach(d => {
+        const category = ANSWER_TO_CATEGORY[d.correctAnswer];
+        if (category && newCategoryStats[category]) {
+          newCategoryStats[category].total++;
+          if (d.status === 'correct') {
+            newCategoryStats[category].correct++;
+          }
+        }
+        
+        if (!newWordStats[d.word]) {
+          newWordStats[d.word] = { word: d.word, meaning: d.meaning, correct: 0, wrong: 0, skip: 0 };
+        }
+        const status = d.status;
+        newWordStats[d.word][status === 'correct' ? 'correct' : status === 'wrong' ? 'wrong' : 'skip']++;
+      });
+    }
+  });
+  
+  // Gộp timeStats bằng cách lấy giá trị lớn nhất của từng bucket
+  const newTimeStats = {};
+  TIME_BUCKETS.forEach(b => {
+    const localVal = (progress.timeStats && progress.timeStats[b.key]) || 0;
+    const importedVal = (imported.timeStats && imported.timeStats[b.key]) || 0;
+    newTimeStats[b.key] = Math.max(localVal, importedVal);
+  });
+
+  progress.history = mergedHistory;
+  progress.exams = updatedExams;
+  progress.categoryStats = newCategoryStats;
+  progress.wordStats = newWordStats;
+  progress.timeStats = newTimeStats;
+  
+  saveProgress();
+  showAlert("Gộp tiến trình thành công! Hệ thống sẽ tự động tải lại trang.").then(() => {
+    window.location.reload();
+  });
+}
+
+// Gắn sự kiện cho các nút Đồng bộ
+el('btn-export-json').addEventListener('click', exportProgressJSON);
+
+el('btn-import-json').addEventListener('click', () => {
+  el('sync-file-input').click();
+});
+
+el('sync-file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const importedData = JSON.parse(event.target.result);
+      showConfirm(
+        "Bạn có chắc chắn muốn gộp dữ liệu từ file sao lưu này vào tiến trình hiện tại?\nHệ thống sẽ lọc trùng lịch sử và giữ lại kết quả tốt nhất của bạn.",
+        "Gộp dữ liệu",
+        "Huỷ"
+      ).then(confirm => {
+        if (confirm) {
+          mergeProgressJSON(importedData);
+        }
+        // Reset file input để có thể chọn lại cùng 1 file
+        el('sync-file-input').value = '';
+      });
+    } catch (err) {
+      showAlert("Không thể đọc file. Hãy chắc chắn rằng bạn đã chọn một file sao lưu JSON hợp lệ.");
+      el('sync-file-input').value = '';
+    }
+  };
+  reader.readAsText(file);
 });
 
 loadQuestions();

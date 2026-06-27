@@ -226,6 +226,39 @@
       <p id="history-more" style="display:none;text-align:center;color:var(--ink-soft);font-size:12.5px;padding:8px 0;"></p>
     </div>
 
+    <div class="screen-stat" id="stat-detail-sync">
+      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
+      <h2 class="level-detail-title"><span class="material-symbols-outlined">sync</span> Đồng bộ dữ liệu</h2>
+      <p class="exam-list-intro">Tải xuống tiến trình học tập của bạn dưới dạng file <code>.json</code> để sao lưu hoặc gộp kết quả học tập của bạn trên trình duyệt khác hoặc thiết bị khác.</p>
+      
+      <div class="sync-container">
+        <div class="sync-card">
+          <h3><span class="material-symbols-outlined">download</span> Tải bản sao lưu (Export)</h3>
+          <p>Tải xuống toàn bộ dữ liệu lịch sử làm bài, thống kê từ vựng và tiến trình các đề thi hiện tại dưới dạng file <code>.json</code>.</p>
+          <button class="btn-primary" id="btn-export-json"><span class="material-symbols-outlined">download</span> Tải file sao lưu (.json)</button>
+        </div>
+        
+        <div class="sync-card">
+          <h3><span class="material-symbols-outlined">upload</span> Khôi phục / Gộp dữ liệu (Import)</h3>
+          <p>Chọn file bản sao lưu <code>.json</code> đã tải từ trước để gộp vào tiến trình hiện tại. Hệ thống sẽ so sánh và giữ lại kết quả tốt nhất của bạn.</p>
+          <button class="btn-success" id="btn-import-json"><span class="material-symbols-outlined">upload</span> Chọn file khôi phục (.json)</button>
+          <input type="file" id="sync-file-input" style="display:none" accept=".json">
+        </div>
+      </div>
+      
+      <div class="sync-warning">
+        <span class="material-symbols-outlined">warning</span>
+        <div>
+          <strong>Lưu ý về chế độ gộp dữ liệu:</strong>
+          <ul>
+            <li>Hệ thống sẽ lọc trùng lịch sử dựa trên thời gian làm bài của từng đề.</li>
+            <li>Các thống kê từ loại, từ vựng và thời gian sẽ được tính toán và dựng lại tự động dựa trên lịch sử đã gộp.</li>
+            <li>Sau khi gộp thành công, trang web sẽ được tự động tải lại (reload) để cập nhật dữ liệu mới.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <div class="bottom-actions" style="margin-top:28px;">
       <button class="btn-primary" id="btn-export-report"><span class="material-symbols-outlined">download</span> Xuất báo cáo .txt</button>
     </div>
