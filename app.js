@@ -1,4 +1,4 @@
-import { DATA_URL, QUESTIONS_PER_EXAM, ANSWER_TO_CATEGORY } from './js/modules/constants.js';
+import { DATA_URL, QUESTIONS_PER_EXAM, ANSWER_TO_CATEGORY, ANSWER_OPTIONS } from './js/modules/constants.js';
 import { state } from './js/modules/state.js';
 import { el, showScreen, showTab, initFullscreen, onTabChange, showConfirm, showAlert, shuffle, getSuffix } from './js/modules/utils.js';
 import { loadProgress, exportProgressJSON, mergeProgressJSON } from './js/modules/storage.js';
@@ -12,7 +12,22 @@ async function loadQuestions() {
     let data = await res.json();
     if (!data) throw new Error("Dữ liệu trống");
     if (!Array.isArray(data)) data = [data];
-    state.ALL_QUESTIONS = data;
+    // File dữ liệu chỉ lưu phần riêng biệt của mỗi câu; "question", "options" và
+    // "explanation.correct" giống nhau ở mọi câu nên được sinh lại ở đây.
+    state.ALL_QUESTIONS = data.map(q => ({
+      id: q.id,
+      word: q.word,
+      meaning: q.meaning,
+      question: 'Từ "' + q.word + '" thuộc từ loại nào?',
+      options: ANSWER_OPTIONS,
+      correctAnswer: q.correctAnswer,
+      explanation: {
+        correct: q.word + ' là ' + ANSWER_OPTIONS.find(o => o.id === q.correctAnswer).text + '.',
+        reason: q.reason,
+        example: q.example,
+      },
+      family: q.family || q.word,
+    }));
   } catch (err) {
     el('loading').innerHTML =
       '⚠️ Không thể tải file dữ liệu <code>' + DATA_URL + '</code>.<br>' +

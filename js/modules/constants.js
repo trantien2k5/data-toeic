@@ -11,12 +11,20 @@ export const CATEGORY_LABEL = {
   ADV: "Trạng từ" 
 };
 
-export const ANSWER_TO_CATEGORY = { 
-  A: "N", 
-  B: "V", 
-  C: "ADJ", 
-  D: "ADV" 
+export const ANSWER_TO_CATEGORY = {
+  A: "N",
+  B: "V",
+  C: "ADJ",
+  D: "ADV"
 };
+
+// Mọi câu hỏi dùng chung 4 đáp án này — không lặp lại trong file dữ liệu.
+export const ANSWER_OPTIONS = [
+  { id: "A", text: "Danh từ (Noun)" },
+  { id: "B", text: "Động từ (Verb)" },
+  { id: "C", text: "Tính từ (Adjective)" },
+  { id: "D", text: "Trạng từ (Adverb)" },
+];
 
 export const ICON = {
   done: 'check_circle', 
