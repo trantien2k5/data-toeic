@@ -72,6 +72,9 @@ export const ICON = {
 export const SUFFIX_LIST = [
   'tion', 'sion', 'ment', 'ness', 'ity', 'ance', 'ence', 'hood', 'ship', 'dom',
   'able', 'ible', 'ful', 'less', 'ive', 'ous', 'ic', 'ed', 'ing', 'al', 'er', 'or', 'ee', 'ly',
+  // Hậu tố bổ sung (đặc biệt là hậu tố Động từ — trước đó chưa có hậu tố nào).
+  'ize', 'ise', 'ify', 'ate', 'en', 'wise', 'ward', 'ure', 'th', 'ist', 'ism',
+  'ical', 'ial', 'ery', 'ent', 'cy', 'ary', 'ant', 'age', 'y',
 ].sort((a, b) => b.length - a.length);
 
 export const TIME_BUCKETS = [

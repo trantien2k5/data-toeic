@@ -4,6 +4,7 @@ import { el, showScreen, showTab, initFullscreen, onTabChange, showConfirm, show
 import { loadProgress, exportProgressJSON, mergeProgressJSON } from './js/modules/storage.js';
 import { renderExamList, startExam, toggleView, renderQuestion, finishExam, applyReviewFilter } from './js/modules/quiz.js';
 import { renderStats, showStatScreen, buildReportText, continueLearning } from './js/modules/stats.js';
+import { loadSuffixExam } from './js/modules/suffixExam.js';
 
 async function loadQuestions() {
   try {
@@ -73,6 +74,11 @@ async function loadQuestions() {
       state.EXAMS.push({ id: "de" + idx, title: "Đề " + idx, level: levelLabel, questions: examQuestions });
     }
   }
+
+  // Đề độc lập "Bài tập nhận diện từ loại" — đọc từ file text js/data/hau-to.txt,
+  // không thuộc 4 Level chính nên hiển thị thành nhóm riêng trong danh sách đề.
+  const suffixExam = await loadSuffixExam();
+  if (suffixExam) state.EXAMS.push(suffixExam);
 
   loadProgress();
   renderExamList();
