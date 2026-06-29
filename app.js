@@ -90,11 +90,15 @@ function initEventListeners() {
     btn.addEventListener('click', () => showTab(btn.dataset.tab));
   });
 
-  // Tab change triggers stats render
+  // Tab change triggers stats render — "Trang chủ", "Báo cáo" và "Ôn tập" đều
+  // đọc từ cùng state.progress, nên dùng lại renderStats() cho cả 3. Báo cáo
+  // và Ôn tập còn reset về màn trang chủ của riêng tab đó mỗi lần mở lại.
   onTabChange((tab) => {
-    if (tab === 'stats') {
+    if (tab === 'home' || tab === 'reports' || tab === 'review') {
       renderStats();
     }
+    if (tab === 'reports') showStatScreen('report-home', 'none');
+    if (tab === 'review') showStatScreen('review-home', 'none');
   });
 
   // Exit exam
@@ -107,7 +111,7 @@ function initEventListeners() {
       el('btn-submit').style.display = 'none';
       el('btn-toggle-view').style.display = 'none';
       document.body.classList.remove('exam-mode');
-      showScreen('screen-exam-list');
+      showScreen('screen-exam-list', 'back');
       renderExamList();
     });
   });
@@ -158,7 +162,7 @@ function initEventListeners() {
 
   // Back from level detail to level grid
   el('btn-back-levels').addEventListener('click', () => {
-    showScreen('screen-exam-list');
+    showScreen('screen-exam-list', 'back');
     renderExamList();
   });
 
@@ -169,13 +173,13 @@ function initEventListeners() {
 
   // Retry / Back buttons from result screen
   el('btn-retry').addEventListener('click', () => startExam(state.currentExam.id));
-  el('btn-back-list').addEventListener('click', () => { 
-    showScreen('screen-exam-list'); 
-    renderExamList(); 
+  el('btn-back-list').addEventListener('click', () => {
+    showScreen('screen-exam-list', 'back');
+    renderExamList();
   });
-  el('btn-back-history').addEventListener('click', () => { 
-    showTab('stats'); 
-    showStatScreen('stat-detail-history'); 
+  el('btn-back-history').addEventListener('click', () => {
+    showTab('reports');
+    showStatScreen('stat-detail-history', 'none');
   });
 
   // Redo wrong ones
@@ -231,16 +235,17 @@ function initEventListeners() {
     startExam('practice-weak-suffix');
   });
 
-  // Stats navigation
-  document.querySelectorAll('#tab-stats .stat-back').forEach(btn => {
-    btn.addEventListener('click', () => showStatScreen('stat-home'));
+  // Stats navigation — "Báo cáo" và "Ôn tập" mỗi tab có trang chủ riêng nên
+  // nút back phải biết quay về đúng trang chủ của tab đang chứa nó.
+  document.querySelectorAll('#tab-reports .stat-back').forEach(btn => {
+    btn.addEventListener('click', () => showStatScreen('report-home', 'back'));
+  });
+  document.querySelectorAll('#tab-review .stat-back').forEach(btn => {
+    btn.addEventListener('click', () => showStatScreen('review-home', 'back'));
   });
 
   // Hero: tiếp tục học ngay đề chưa hoàn thành
   el('btn-continue-learning').addEventListener('click', continueLearning);
-
-  // Đi tới màn đồng bộ dữ liệu
-  el('btn-go-sync').addEventListener('click', () => showStatScreen('stat-detail-sync'));
 
   // Export report
   el('btn-export-report').addEventListener('click', () => {

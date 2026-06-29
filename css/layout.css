@@ -43,10 +43,11 @@ header.topbar h1 .material-symbols-outlined {
 .top-tabs button {
   background: transparent;
   color: var(--ink-soft);
-  padding: 8px 18px;
+  padding: 8px 14px;
   font-size: 13px;
   border-radius: 9px;
   box-shadow: none;
+  white-space: nowrap;
 }
 .top-tabs button.active {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
@@ -104,30 +105,79 @@ body.exam-mode .app-body {
 body.exam-mode .main-col {
   padding-top: 28px;
 }
-.screen {
-  display: none;
-}
-.screen.active {
-  display: block;
-  animation: fadeIn 0.3s ease-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+/* ===== Page navigation: forward (drill into a screen) slides in from the
+   right, back slides in from the left — gives drill-down/back a consistent,
+   "stacked screens" feel instead of a flat content swap. ===== */
+.screen,
 .screen-stat {
   display: none;
 }
+.screen.active,
 .screen-stat.active {
   display: block;
-  animation: fadeIn 0.3s ease-out;
 }
+.screen.active.dir-fwd,
+.screen-stat.active.dir-fwd {
+  animation: page-slide-fwd 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.screen.active.dir-back,
+.screen-stat.active.dir-back {
+  animation: page-slide-back 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes page-slide-fwd {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes page-slide-back {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen.active, .screen-stat.active {
+    animation: none !important;
+  }
+}
+
 .tabview {
   display: none;
 }
 .tabview.active {
   display: block;
+}
+
+/* ===== Sub-header: back chevron + page title, used by every drill-down
+   screen (level detail, stat detail) so navigating "into" something always
+   looks/behaves the same instead of each screen rolling its own header. ===== */
+.page-subheader {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 18px;
+}
+.page-subheader .back-link {
+  margin: 0;
+  padding: 8px;
+  display: inline-flex;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.page-subheader .back-link:hover {
+  background: var(--primary-light);
+}
+.page-subheader-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Standalone title with no back button (e.g. Hồ sơ tab, a root tab with no
+   drill-down), so it needs its own bottom spacing instead of relying on
+   .page-subheader's flex row. */
+.page-subheader-title.profile-title {
+  margin: 0 0 18px;
 }
 
 /* ===== Custom confirmation Modal dialog ===== */
@@ -137,24 +187,32 @@ body.exam-mode .main-col {
   background: var(--overlay-bg);
   backdrop-filter: blur(8px);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   z-index: 100;
-  padding: 20px;
+  padding: 0;
   animation: modal-fade-in 0.2s ease-out;
 }
 @keyframes modal-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+/* Mobile: native-feeling bottom sheet that slides up from the edge it's
+   anchored to, instead of a centered dialog floating mid-screen. */
 .modal-box {
   background: var(--modal-bg);
-  border-radius: var(--radius-md);
-  padding: 26px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding: 22px 20px max(22px, env(safe-area-inset-bottom));
   max-width: 400px;
   width: 100%;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 -10px 30px -5px rgba(0, 0, 0, 0.12);
   border: 1px solid var(--outline);
+  border-bottom: none;
+  animation: modal-sheet-up 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes modal-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 .modal-message {
   font-size: 15px;
@@ -167,6 +225,29 @@ body.exam-mode .main-col {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+.modal-actions button {
+  flex: 1;
+  justify-content: center;
+}
+
+/* Desktop: revert to a centered floating dialog — bottom sheets only make
+   sense on narrow/touch screens. */
+@media (min-width: 640px) {
+  .modal-overlay {
+    align-items: center;
+    padding: 20px;
+  }
+  .modal-box {
+    border-radius: var(--radius-md);
+    border-bottom: 1px solid var(--outline);
+    padding: 26px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: modal-fade-in 0.2s ease-out;
+  }
+  .modal-actions button {
+    flex: none;
+  }
 }
 
 /* Mobile Bottom Navigation Bar */

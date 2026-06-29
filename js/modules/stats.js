@@ -97,8 +97,8 @@ export function renderStats() {
   renderFamilyStats();
   renderTimeStats();
   renderStudyPlan();
-  renderStatsHome();
-  showStatScreen('stat-home');
+  renderReportsHome();
+  renderReviewHome();
 }
 
 // Tổng tiến độ + tiến độ từng level + streak + ước tính TOEIC tham khảo.
@@ -193,54 +193,69 @@ export function renderConfusion() {
   el('confusion-empty').style.display = rows.length > 0 ? 'none' : 'block';
 }
 
-export function showStatScreen(id) {
-  document.querySelectorAll('#tab-stats .screen-stat').forEach(s => s.classList.remove('active'));
-  el(id).classList.add('active');
+// "Báo cáo" và "Ôn tập" giờ là 2 tab riêng, dùng chung hệ screen-stat — chọn
+// global thay vì scope theo 1 tab cố định, vì các #id màn chi tiết nằm rải
+// trong cả #tab-reports và #tab-review.
+export function showStatScreen(id, direction = 'forward') {
+  document.querySelectorAll('.screen-stat').forEach(s => s.classList.remove('active', 'dir-fwd', 'dir-back'));
+  const screen = el(id);
+  screen.classList.add('active');
+  if (direction !== 'none') screen.classList.add(direction === 'back' ? 'dir-back' : 'dir-fwd');
   window.scrollTo(0, 0);
 }
 
-export function renderStatsHome() {
+function buildStatCard(c) {
+  const card = document.createElement('div');
+  card.className = 'level-card';
+  card.innerHTML =
+    '<div class="lc-top"><span class="lc-icon">' + c.icon + '</span><h3>' + c.title + '</h3></div>' +
+    '<div class="lc-sub">' + c.sub + '</div>' +
+    '<div class="lc-footer"><span></span><span class="lc-arrow">Xem chi tiết <span class="material-symbols-outlined">arrow_forward</span></span></div>';
+  card.addEventListener('click', () => showStatScreen(c.id, 'forward'));
+  return card;
+}
+
+// Tab "Báo cáo": các trang phân tích số liệu thuần (xu hướng, accuracy theo
+// level/từ loại/thời gian, nhầm lẫn, theo đề, lịch sử).
+export function renderReportsHome() {
   const examIds = state.EXAMS.map(e => e.id);
   const completedExams = state.EXAMS.filter(e => getExamProgress(e.id).status === 'done').length;
-  const wrongWordsCount = Object.values(state.progress.wordStats || {}).filter(w => w.wrong > 0).length;
   const historyCount = (state.progress.history || []).length;
-
-  const familyCount = Object.keys(buildFamilyGroups()).length;
   const answeredWithTime = TIME_BUCKETS.reduce((s, b) => s + (state.progress.timeStats[b.key] || 0), 0);
   const confusionCount = buildConfusionRows().length;
-
   const historyForTrend = state.progress.history || [];
 
-  // Thứ tự nhóm theo mức độ quan trọng: Tiến độ → Phân tích → Ôn tập → Lịch sử.
-  // "Đồng bộ dữ liệu" không còn là card ở đây — đã chuyển thành nút riêng ở
-  // cuối tab (xem nút "Đồng bộ" cạnh "Xuất báo cáo .txt").
   const cards = [
     { id: 'stat-detail-trend', icon: '📈', title: 'Tiến độ theo thời gian', sub: historyForTrend.length + ' lượt đã ghi nhận' },
     { id: 'stat-detail-level', icon: '🎯', title: 'Accuracy theo Level', sub: 'Tiến độ từng giai đoạn' },
     { id: 'stat-detail-category', icon: '📚', title: 'Theo từ loại', sub: 'Noun / Verb / Adjective / Adverb' },
-    { id: 'stat-detail-suffix', icon: '🧩', title: 'Theo hậu tố', sub: 'Quy tắc hậu tố bạn còn yếu' },
-    { id: 'stat-detail-family', icon: '🔤', title: 'Theo Word Family', sub: familyCount + ' nhóm từ cùng gốc' },
     { id: 'stat-detail-time', icon: '⚡', title: 'Theo thời gian trả lời', sub: answeredWithTime + ' câu đã đo thời gian' },
-    { id: 'stat-detail-worst', icon: '🔥', title: 'Từ sai nhiều nhất', sub: wrongWordsCount + ' từ cần ôn lại' },
-    { id: 'stat-detail-best', icon: '⭐', title: 'Từ đã thành thạo', sub: buildBestWordsRows().length + ' từ làm tốt' },
+    { id: 'stat-detail-confusion', icon: '🧠', title: 'Phân tích nhầm lẫn', sub: confusionCount + ' từ hay bị nhầm từ loại' },
     { id: 'stat-detail-exams', icon: '📝', title: 'Theo từng đề', sub: completedExams + '/' + examIds.length + ' đề hoàn thành' },
     { id: 'stat-detail-history', icon: '📜', title: 'Lịch sử làm bài', sub: historyCount + ' lượt đã làm' },
-    { id: 'stat-detail-confusion', icon: '🧠', title: 'Phân tích nhầm lẫn', sub: confusionCount + ' từ hay bị nhầm từ loại' },
+  ];
+
+  const grid = el('report-grid');
+  grid.innerHTML = '';
+  cards.forEach(c => grid.appendChild(buildStatCard(c)));
+}
+
+// Tab "Ôn tập": điểm yếu cần luyện lại + điểm mạnh đã thành thạo + kế hoạch.
+export function renderReviewHome() {
+  const wrongWordsCount = Object.values(state.progress.wordStats || {}).filter(w => w.wrong > 0).length;
+  const familyCount = Object.keys(buildFamilyGroups()).length;
+
+  const cards = [
+    { id: 'stat-detail-suffix', icon: '🧩', title: 'Theo hậu tố', sub: 'Quy tắc hậu tố bạn còn yếu' },
+    { id: 'stat-detail-worst', icon: '🔥', title: 'Từ sai nhiều nhất', sub: wrongWordsCount + ' từ cần ôn lại' },
+    { id: 'stat-detail-best', icon: '⭐', title: 'Từ đã thành thạo', sub: buildBestWordsRows().length + ' từ làm tốt' },
+    { id: 'stat-detail-family', icon: '🔤', title: 'Theo Word Family', sub: familyCount + ' nhóm từ cùng gốc' },
     { id: 'stat-detail-plan', icon: '📋', title: 'Kế hoạch tiếp theo', sub: 'Bạn nên học gì tiếp theo?' },
   ];
 
-  const grid = el('stat-category-grid');
+  const grid = el('review-grid');
   grid.innerHTML = '';
-  cards.forEach(c => {
-    const card = document.createElement('div');
-    card.className = 'level-card';
-    card.innerHTML =
-      '<div class="lc-top"><span class="lc-icon">' + c.icon + '</span><h3>' + c.title + '</h3></div>' +
-      '<div class="lc-sub">' + c.sub + '</div>' +
-      '<div class="lc-footer"><span></span><span class="lc-arrow">Xem chi tiết <span class="material-symbols-outlined">arrow_forward</span></span></div>';
-    card.addEventListener('click', () => showStatScreen(c.id));
-    grid.appendChild(card);
-  });
+  cards.forEach(c => grid.appendChild(buildStatCard(c)));
 }
 
 // Xu hướng điểm số của 10 lượt gần nhất (trái = cũ nhất, phải = mới nhất) —

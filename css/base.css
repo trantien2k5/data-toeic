@@ -198,6 +198,18 @@ button:disabled {
   box-shadow: none !important;
 }
 
+/* Touch press feedback — touch devices never trigger :hover, so without this
+   every tap feels unresponsive until the next screen/state shows up. */
+button:not(:disabled):active,
+.level-card:active,
+.exam-card:active,
+.option:active,
+.nav-dot:active,
+.filter-chip:active {
+  transform: scale(0.97);
+  transition-duration: 0.08s;
+}
+
 #loading {
   text-align: center;
   padding: 80px 0;

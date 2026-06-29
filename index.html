@@ -22,8 +22,11 @@
 <header class="topbar">
   <h1><span class="material-symbols-outlined">school</span> Nhận diện từ loại TOEIC</h1>
   <div class="top-tabs" id="top-tabs">
-    <button data-tab="exams" class="active"><span class="material-symbols-outlined">edit_note</span> Làm bài</button>
-    <button data-tab="stats"><span class="material-symbols-outlined">bar_chart</span> Thống kê</button>
+    <button data-tab="home" class="active"><span class="material-symbols-outlined">home</span> Trang chủ</button>
+    <button data-tab="exams"><span class="material-symbols-outlined">menu_book</span> Luyện đề</button>
+    <button data-tab="reports"><span class="material-symbols-outlined">insights</span> Báo cáo</button>
+    <button data-tab="review"><span class="material-symbols-outlined">track_changes</span> Ôn tập</button>
+    <button data-tab="profile"><span class="material-symbols-outlined">person</span> Hồ sơ</button>
   </div>
   <button id="exit-exam-btn" class="btn-outline btn-sm" title="Thoát đề"><span class="material-symbols-outlined">logout</span><span class="btn-label">Thoát đề</span></button>
   <button id="btn-toggle-view" class="btn-outline btn-sm hidden" title="Xem danh sách câu hỏi"><span class="material-symbols-outlined">view_list</span><span class="btn-label">Xem danh sách câu hỏi</span></button>
@@ -37,20 +40,55 @@
 
   <div id="loading">Đang tải đề thi...</div>
 
-  <!-- TAB: EXAM LIST -->
-  <div class="tabview active" id="tab-exams">
+  <!-- TAB: TRANG CHỦ — tổng quan tiến độ, không có drill-down, chỉ 1 màn duy nhất. -->
+  <div class="tabview active" id="tab-home">
+    <div class="toeic-hero">
+      <div class="toeic-hero-top">
+        <div class="toeic-hero-title">🎯 Tiến độ TOEIC B1</div>
+        <button class="btn-primary btn-sm" id="btn-continue-learning">Tiếp tục học</button>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="hero-progress-fill"></div></div>
+      <div class="toeic-hero-pct" id="hero-progress-pct">0%</div>
+      <div class="toeic-hero-levels" id="hero-levels"></div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-card">
+        <div class="hero-label">Accuracy</div>
+        <div class="hero-value" id="ov-accuracy">0%</div>
+        <div class="hero-sub">Lịch sử: <b id="ov-accuracy-lifetime">0%</b></div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-label">Streak</div>
+        <div class="hero-value" id="hero-streak-current">0</div>
+        <div class="hero-sub">Kỷ lục: <b id="hero-streak-best">0</b></div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-label">TOEIC (ước tính)</div>
+        <div class="hero-value" id="hero-toeic-range">—</div>
+        <div class="hero-sub" title="Ước tính tham khảo dựa trên độ chính xác nhận diện từ loại, không phải điểm thi thực tế">Chỉ tham khảo, không phải điểm thật</div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-label">Đã làm</div>
+        <div class="hero-value" id="ov-answered">0</div>
+        <div class="hero-sub">câu · <b id="ov-attempts">0</b> lượt làm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: LUYỆN ĐỀ -->
+  <div class="tabview" id="tab-exams">
 
     <div class="screen active" id="screen-exam-list">
-      <p class="exam-list-intro">Bộ đề gồm 400 câu, chia thành 4 cấp độ (Level 1–4), mỗi cấp độ 5 đề × 20 câu. Bấm vào một cấp độ để xem danh sách đề. Mỗi lần làm bài, câu hỏi và thứ tự đáp án sẽ được xáo trộn ngẫu nhiên.</p>
       <div class="level-grid" id="exam-grid"></div>
     </div>
 
     <!-- DRILL-DOWN: danh sách đề trong 1 level -->
     <div class="screen" id="screen-level-detail">
-      <button type="button" class="back-link" id="btn-back-levels">
-        <span class="material-symbols-outlined">arrow_back</span> Quay lại danh sách cấp độ
-      </button>
-      <h2 class="level-detail-title" id="level-detail-title">Level</h2>
+      <div class="page-subheader">
+        <button type="button" class="back-link" id="btn-back-levels" aria-label="Quay lại danh sách cấp độ"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title" id="level-detail-title">Level</h2>
+      </div>
       <div class="exam-grid" id="level-exam-grid"></div>
     </div>
 
@@ -140,96 +178,55 @@
 
   </div>
 
-  <!-- TAB: STATISTICS -->
-  <div class="tabview" id="tab-stats">
-    <div class="toeic-hero">
-      <div class="toeic-hero-top">
-        <div class="toeic-hero-title">🎯 Tiến độ TOEIC B1</div>
-        <button class="btn-primary btn-sm" id="btn-continue-learning">Tiếp tục học</button>
-      </div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="hero-progress-fill"></div></div>
-      <div class="toeic-hero-pct" id="hero-progress-pct">0%</div>
-      <div class="toeic-hero-levels" id="hero-levels"></div>
-    </div>
+  <!-- TAB: BÁO CÁO — các trang phân tích số liệu (xu hướng, accuracy, từ loại,
+       thời gian trả lời, nhầm lẫn, theo đề, lịch sử). -->
+  <div class="tabview" id="tab-reports">
 
-    <div class="hero-stats">
-      <div class="hero-card">
-        <div class="hero-label">Accuracy</div>
-        <div class="hero-value" id="ov-accuracy">0%</div>
-        <div class="hero-sub">Lịch sử: <b id="ov-accuracy-lifetime">0%</b></div>
-      </div>
-      <div class="hero-card">
-        <div class="hero-label">Streak</div>
-        <div class="hero-value" id="hero-streak-current">0</div>
-        <div class="hero-sub">Kỷ lục: <b id="hero-streak-best">0</b></div>
-      </div>
-      <div class="hero-card">
-        <div class="hero-label">TOEIC (ước tính)</div>
-        <div class="hero-value" id="hero-toeic-range">—</div>
-        <div class="hero-sub" title="Ước tính tham khảo dựa trên độ chính xác nhận diện từ loại, không phải điểm thi thực tế">Chỉ tham khảo, không phải điểm thật</div>
-      </div>
-      <div class="hero-card">
-        <div class="hero-label">Đã làm</div>
-        <div class="hero-value" id="ov-answered">0</div>
-        <div class="hero-sub">câu · <b id="ov-attempts">0</b> lượt làm</div>
-      </div>
-    </div>
-
-    <!-- TRANG CHỦ THỐNG KÊ: 4 thẻ, bấm vào mới drill-down sang chi tiết -->
-    <div class="screen-stat active" id="stat-home">
-      <div class="level-grid" id="stat-category-grid"></div>
+    <div class="screen-stat active" id="report-home">
+      <div class="level-grid" id="report-grid"></div>
     </div>
 
     <div class="screen-stat" id="stat-detail-trend">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">📈 Tiến độ theo thời gian</h2>
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">📈 Tiến độ theo thời gian</h2>
+      </div>
       <p class="exam-list-intro">Xu hướng 10 lượt gần nhất (trái = cũ nhất, phải = mới nhất) — xem bạn đang tiến bộ hay chững lại.</p>
       <div class="trend-row" id="history-trend"></div>
     </div>
 
     <div class="screen-stat" id="stat-detail-level">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">🎯 Accuracy theo Level</h2>
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">🎯 Accuracy theo Level</h2>
+      </div>
       <p class="exam-list-intro">Độ chính xác cộng dồn của tất cả câu đã làm trong từng level — dễ theo dõi tiến độ từng giai đoạn.</p>
       <div id="level-accuracy-stats"></div>
     </div>
 
     <div class="screen-stat" id="stat-detail-category">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">📚 Theo từ loại</h2>
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">📚 Theo từ loại</h2>
+      </div>
       <div id="cat-stats"></div>
     </div>
 
-    <div class="screen-stat" id="stat-detail-suffix">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">🧩 Theo hậu tố</h2>
-      <p class="exam-list-intro">Đây là thống kê quan trọng nhất để biết bạn yếu quy tắc hậu tố nào.</p>
-      <div class="bottom-actions left">
-        <button class="btn-primary" id="btn-practice-weak-suffix"><span class="material-symbols-outlined">auto_fix_high</span> Ôn tập điểm yếu</button>
-      </div>
-      <div id="suffix-tiers"></div>
-      <p id="suffix-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
-    </div>
-
-    <div class="screen-stat" id="stat-detail-family">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">🔤 Theo Word Family</h2>
-      <p class="exam-list-intro">Các từ cùng gốc (ví dụ: advise / advice) — xem bạn nhầm từ loại ở dạng nào trong cùng một họ từ.</p>
-      <div id="family-stats"></div>
-      <p id="family-empty" class="hint-empty">Chưa có dữ liệu — cần làm thêm các câu có từ cùng gốc.</p>
-    </div>
-
     <div class="screen-stat" id="stat-detail-time">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">⚡ Theo thời gian trả lời</h2>
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">⚡ Theo thời gian trả lời</h2>
+      </div>
       <p class="exam-list-intro">Mục tiêu không chỉ là đúng, mà còn nhanh. Thời gian được ước lượng theo khoảng cách giữa các lần chọn đáp án.</p>
       <div id="time-stats"></div>
       <p id="time-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
     </div>
 
     <div class="screen-stat" id="stat-detail-confusion">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">🧠 Phân tích nhầm lẫn</h2>
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">🧠 Phân tích nhầm lẫn</h2>
+      </div>
       <p class="exam-list-intro">Với mỗi từ bạn hay sai, đây là từ loại bạn thường chọn nhầm nhất — giúp thấy rõ kiểu nhầm lẫn (vd: hay nhầm Động từ thành Danh từ) thay vì chỉ biết đúng/sai.</p>
       <table class="exam-table" id="confusion-table">
         <thead><tr><th>Từ</th><th>Nghĩa</th><th>Đúng là</th><th>Bạn hay chọn nhầm</th></tr></thead>
@@ -238,9 +235,58 @@
       <p id="confusion-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
     </div>
 
+    <div class="screen-stat" id="stat-detail-exams">
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">📝 Theo từng đề</h2>
+      </div>
+      <table class="exam-table">
+        <thead><tr><th>Đề</th><th>Trạng thái</th><th>Lượt làm</th><th>Điểm gần nhất</th><th>Điểm cao nhất</th><th>Ổn định</th></tr></thead>
+        <tbody id="exam-table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="screen-stat" id="stat-detail-history">
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">📜 Lịch sử làm bài</h2>
+      </div>
+      <table class="exam-table" id="history-table">
+        <thead><tr><th>Thời gian</th><th>Đề</th><th>Level</th><th>Điểm</th><th>Đúng/Sai/Bỏ trống</th><th></th></tr></thead>
+        <tbody id="history-body"></tbody>
+      </table>
+      <p id="history-empty" class="hint-empty">Chưa có lượt làm bài nào.</p>
+      <p id="history-more" class="hint-note"></p>
+    </div>
+
+  </div>
+
+  <!-- TAB: ÔN TẬP — điểm yếu cần luyện lại (hậu tố, từ sai nhiều, word family)
+       và điểm mạnh đã thành thạo + kế hoạch học tiếp theo. -->
+  <div class="tabview" id="tab-review">
+
+    <div class="screen-stat active" id="review-home">
+      <div class="level-grid" id="review-grid"></div>
+    </div>
+
+    <div class="screen-stat" id="stat-detail-suffix">
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Ôn tập"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">🧩 Theo hậu tố</h2>
+      </div>
+      <p class="exam-list-intro">Đây là thống kê quan trọng nhất để biết bạn yếu quy tắc hậu tố nào.</p>
+      <div class="bottom-actions left">
+        <button class="btn-primary" id="btn-practice-weak-suffix"><span class="material-symbols-outlined">auto_fix_high</span> Ôn tập điểm yếu</button>
+      </div>
+      <div id="suffix-tiers"></div>
+      <p id="suffix-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
+    </div>
+
     <div class="screen-stat" id="stat-detail-worst">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">🔥 Từ sai nhiều nhất</h2>
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Ôn tập"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">🔥 Từ sai nhiều nhất</h2>
+      </div>
       <div class="bottom-actions left">
         <button class="btn-primary" id="btn-practice-worst-words"><span class="material-symbols-outlined">auto_fix_high</span> Ôn tập từ sai nhiều nhất</button>
       </div>
@@ -252,8 +298,10 @@
     </div>
 
     <div class="screen-stat" id="stat-detail-best">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">⭐ Từ đã thành thạo</h2>
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Ôn tập"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">⭐ Từ đã thành thạo</h2>
+      </div>
       <p class="exam-list-intro">Các từ bạn đã làm đúng từ 2 lần trở lên và chưa sai lần nào — để thấy mình đã tiến bộ chứ không chỉ toàn điểm yếu.</p>
       <table class="exam-table" id="best-words-table">
         <thead><tr><th>Từ</th><th>Nghĩa</th><th>Số lần đúng</th><th>Tỉ lệ đúng</th></tr></thead>
@@ -262,68 +310,63 @@
       <p id="best-words-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
     </div>
 
-    <div class="screen-stat" id="stat-detail-exams">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">📝 Theo từng đề</h2>
-      <table class="exam-table">
-        <thead><tr><th>Đề</th><th>Trạng thái</th><th>Lượt làm</th><th>Điểm gần nhất</th><th>Điểm cao nhất</th><th>Ổn định</th></tr></thead>
-        <tbody id="exam-table-body"></tbody>
-      </table>
-    </div>
-
-    <div class="screen-stat" id="stat-detail-history">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">📜 Lịch sử làm bài</h2>
-      <table class="exam-table" id="history-table">
-        <thead><tr><th>Thời gian</th><th>Đề</th><th>Level</th><th>Điểm</th><th>Đúng/Sai/Bỏ trống</th><th></th></tr></thead>
-        <tbody id="history-body"></tbody>
-      </table>
-      <p id="history-empty" class="hint-empty">Chưa có lượt làm bài nào.</p>
-      <p id="history-more" class="hint-note"></p>
+    <div class="screen-stat" id="stat-detail-family">
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Ôn tập"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">🔤 Theo Word Family</h2>
+      </div>
+      <p class="exam-list-intro">Các từ cùng gốc (ví dụ: advise / advice) — xem bạn nhầm từ loại ở dạng nào trong cùng một họ từ.</p>
+      <div id="family-stats"></div>
+      <p id="family-empty" class="hint-empty">Chưa có dữ liệu — cần làm thêm các câu có từ cùng gốc.</p>
     </div>
 
     <div class="screen-stat" id="stat-detail-plan">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title">📋 Kế hoạch tiếp theo</h2>
+      <div class="page-subheader">
+        <button type="button" class="back-link stat-back" aria-label="Quay lại Ôn tập"><span class="material-symbols-outlined">arrow_back</span></button>
+        <h2 class="page-subheader-title">📋 Kế hoạch tiếp theo</h2>
+      </div>
       <div id="study-plan-content"></div>
     </div>
 
-    <div class="screen-stat" id="stat-detail-sync">
-      <button type="button" class="back-link stat-back"><span class="material-symbols-outlined">arrow_back</span> Quay lại Thống kê</button>
-      <h2 class="level-detail-title"><span class="material-symbols-outlined">sync</span> Đồng bộ dữ liệu</h2>
-      <p class="exam-list-intro">Tải xuống tiến trình học tập của bạn dưới dạng file <code>.json</code> để sao lưu hoặc gộp kết quả học tập của bạn trên trình duyệt khác hoặc thiết bị khác.</p>
+  </div>
 
-      <div class="sync-container">
-        <div class="sync-card">
-          <h3><span class="material-symbols-outlined">download</span> Tải bản sao lưu (Export)</h3>
-          <p>Tải xuống toàn bộ dữ liệu lịch sử làm bài, thống kê từ vựng và tiến trình các đề thi hiện tại dưới dạng file <code>.json</code>.</p>
-          <button class="btn-primary" id="btn-export-json"><span class="material-symbols-outlined">download</span> Tải file sao lưu (.json)</button>
-        </div>
+  <!-- TAB: HỒ SƠ — xuất báo cáo + đồng bộ/sao lưu dữ liệu. Không cần
+       drill-down vì chỉ có 1 nhóm nội dung. -->
+  <div class="tabview" id="tab-profile">
+    <h2 class="page-subheader-title profile-title"><span class="material-symbols-outlined">person</span> Hồ sơ &amp; Dữ liệu</h2>
 
-        <div class="sync-card">
-          <h3><span class="material-symbols-outlined">upload</span> Khôi phục / Gộp dữ liệu (Import)</h3>
-          <p>Chọn file bản sao lưu <code>.json</code> đã tải từ trước để gộp vào tiến trình hiện tại. Hệ thống sẽ so sánh và giữ lại kết quả tốt nhất của bạn.</p>
-          <button class="btn-success" id="btn-import-json"><span class="material-symbols-outlined">upload</span> Chọn file khôi phục (.json)</button>
-          <input type="file" id="sync-file-input" class="hidden" accept=".json">
-        </div>
+    <div class="bottom-actions left">
+      <button class="btn-primary" id="btn-export-report"><span class="material-symbols-outlined">download</span> Xuất báo cáo .txt</button>
+    </div>
+
+    <h3 class="section-title" style="margin-top:8px;"><span class="material-symbols-outlined">sync</span> Đồng bộ dữ liệu</h3>
+    <p class="exam-list-intro">Tải xuống tiến trình học tập của bạn dưới dạng file <code>.json</code> để sao lưu hoặc gộp kết quả học tập của bạn trên trình duyệt khác hoặc thiết bị khác.</p>
+
+    <div class="sync-container">
+      <div class="sync-card">
+        <h3><span class="material-symbols-outlined">download</span> Tải bản sao lưu (Export)</h3>
+        <p>Tải xuống toàn bộ dữ liệu lịch sử làm bài, thống kê từ vựng và tiến trình các đề thi hiện tại dưới dạng file <code>.json</code>.</p>
+        <button class="btn-primary" id="btn-export-json"><span class="material-symbols-outlined">download</span> Tải file sao lưu (.json)</button>
       </div>
 
-      <div class="sync-warning">
-        <span class="material-symbols-outlined">warning</span>
-        <div>
-          <strong>Lưu ý về chế độ gộp dữ liệu:</strong>
-          <ul>
-            <li>Hệ thống sẽ lọc trùng lịch sử dựa trên thời gian làm bài của từng đề.</li>
-            <li>Các thống kê từ loại, từ vựng và thời gian sẽ được tính toán và dựng lại tự động dựa trên lịch sử đã gộp.</li>
-            <li>Sau khi gộp thành công, trang web sẽ được tự động tải lại (reload) để cập nhật dữ liệu mới.</li>
-          </ul>
-        </div>
+      <div class="sync-card">
+        <h3><span class="material-symbols-outlined">upload</span> Khôi phục / Gộp dữ liệu (Import)</h3>
+        <p>Chọn file bản sao lưu <code>.json</code> đã tải từ trước để gộp vào tiến trình hiện tại. Hệ thống sẽ so sánh và giữ lại kết quả tốt nhất của bạn.</p>
+        <button class="btn-success" id="btn-import-json"><span class="material-symbols-outlined">upload</span> Chọn file khôi phục (.json)</button>
+        <input type="file" id="sync-file-input" class="hidden" accept=".json">
       </div>
     </div>
 
-    <div class="bottom-actions footer">
-      <button class="btn-primary" id="btn-export-report"><span class="material-symbols-outlined">download</span> Xuất báo cáo .txt</button>
-      <button class="btn-outline" id="btn-go-sync"><span class="material-symbols-outlined">sync</span> Đồng bộ</button>
+    <div class="sync-warning">
+      <span class="material-symbols-outlined">warning</span>
+      <div>
+        <strong>Lưu ý về chế độ gộp dữ liệu:</strong>
+        <ul>
+          <li>Hệ thống sẽ lọc trùng lịch sử dựa trên thời gian làm bài của từng đề.</li>
+          <li>Các thống kê từ loại, từ vựng và thời gian sẽ được tính toán và dựng lại tự động dựa trên lịch sử đã gộp.</li>
+          <li>Sau khi gộp thành công, trang web sẽ được tự động tải lại (reload) để cập nhật dữ liệu mới.</li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -331,13 +374,25 @@
 </div>
 
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
-  <button data-tab="exams" class="active">
-    <span class="material-symbols-outlined">edit_note</span>
-    <span>Làm bài</span>
+  <button data-tab="home" class="active">
+    <span class="material-symbols-outlined">home</span>
+    <span>Trang chủ</span>
   </button>
-  <button data-tab="stats">
-    <span class="material-symbols-outlined">bar_chart</span>
-    <span>Thống kê</span>
+  <button data-tab="exams">
+    <span class="material-symbols-outlined">menu_book</span>
+    <span>Luyện đề</span>
+  </button>
+  <button data-tab="reports">
+    <span class="material-symbols-outlined">insights</span>
+    <span>Báo cáo</span>
+  </button>
+  <button data-tab="review">
+    <span class="material-symbols-outlined">track_changes</span>
+    <span>Ôn tập</span>
+  </button>
+  <button data-tab="profile">
+    <span class="material-symbols-outlined">person</span>
+    <span>Hồ sơ</span>
   </button>
 </nav>
 

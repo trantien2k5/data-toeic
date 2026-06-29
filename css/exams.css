@@ -173,15 +173,6 @@
   text-decoration: underline;
   background: transparent;
 }
-.level-detail-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ink);
-  margin: 0 0 18px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.level-detail-title .material-symbols-outlined {
+.page-subheader-title .material-symbols-outlined {
   color: var(--primary);
 }

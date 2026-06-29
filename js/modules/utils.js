@@ -96,9 +96,14 @@ export function onTabChange(callback) {
   tabChangeListeners.push(callback);
 }
 
-export function showScreen(id) {
-  document.querySelectorAll('#tab-exams .screen').forEach(s => s.classList.remove('active'));
-  el(id).classList.add('active');
+// direction: 'forward' (drilling into a screen, slide from right) | 'back'
+// (returning to a previous screen, slide from left) | 'none' (no animation,
+// e.g. resetting to the home screen on a bottom-tab switch).
+export function showScreen(id, direction = 'forward') {
+  document.querySelectorAll('#tab-exams .screen').forEach(s => s.classList.remove('active', 'dir-fwd', 'dir-back'));
+  const screen = el(id);
+  screen.classList.add('active');
+  if (direction !== 'none') screen.classList.add(direction === 'back' ? 'dir-back' : 'dir-fwd');
   window.scrollTo(0, 0);
 }
 
