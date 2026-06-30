@@ -104,6 +104,12 @@ export function startExam(examId) {
   startTimer();
   showScreen('screen-quiz');
   renderListView();
+  // Reset hiển thị "Đã làm: x/y" + thanh tiến độ về đúng trạng thái vừa
+  // reset ở trên — nếu không, số liệu của lượt làm TRƯỚC ĐÓ (vd thoát giữa
+  // chừng rồi mở lại) vẫn đứng yên trên UI cho tới khi người dùng chọn đáp
+  // án đầu tiên, trông giống như app "nhớ" lại bài cũ dù dữ liệu thật đã
+  // reset sạch.
+  updateProgress();
 }
 
 export function toggleView() {

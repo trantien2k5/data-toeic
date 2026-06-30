@@ -1,0 +1,27 @@
+{
+  "name": "data-toeic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trantien2k5/data-toeic.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/trantien2k5/data-toeic/issues"
+  },
+  "homepage": "https://github.com/trantien2k5/data-toeic#readme",
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}

@@ -2,20 +2,28 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
   <title>Thi trắc nghiệm - Nhận diện từ loại TOEIC</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <link rel="icon" href="icons/icon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&display=swap">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/exams.css">
-  <link rel="stylesheet" href="css/quiz.css">
-  <link rel="stylesheet" href="css/result.css">
-  <link rel="stylesheet" href="css/stats.css">
-  <link rel="stylesheet" href="css/responsive.css">
+  <!-- ?v= phải khớp tay với "version" trong version.json — đây là file tĩnh,
+       không tự đọc version.json được trước khi tải CSS. Đổi CSS/JS thì nhớ
+       bump version ở CẢ 2 nơi (version.json + các dòng ?v= dưới đây). -->
+  <link rel="stylesheet" href="css/base.css?v=1.0.10">
+  <link rel="stylesheet" href="css/layout.css?v=1.0.10">
+  <link rel="stylesheet" href="css/exams.css?v=1.0.10">
+  <link rel="stylesheet" href="css/quiz.css?v=1.0.10">
+  <link rel="stylesheet" href="css/result.css?v=1.0.10">
+  <link rel="stylesheet" href="css/stats.css?v=1.0.10">
+  <link rel="stylesheet" href="css/responsive.css?v=1.0.10">
 </head>
 <body oncontextmenu="return false" oncopy="return false" oncut="return false">
 
@@ -191,7 +199,7 @@
         <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
         <h2 class="page-subheader-title">📈 Tiến độ theo thời gian</h2>
       </div>
-      <p class="exam-list-intro">Xu hướng 10 lượt gần nhất (trái = cũ nhất, phải = mới nhất) — xem bạn đang tiến bộ hay chững lại.</p>
+      <p class="exam-list-intro">10 lượt gần nhất, trái cũ phải mới.</p>
       <div class="trend-row" id="history-trend"></div>
     </div>
 
@@ -200,7 +208,7 @@
         <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
         <h2 class="page-subheader-title">🎯 Accuracy theo Level</h2>
       </div>
-      <p class="exam-list-intro">Độ chính xác cộng dồn của tất cả câu đã làm trong từng level — dễ theo dõi tiến độ từng giai đoạn.</p>
+      <p class="exam-list-intro">Độ chính xác cộng dồn theo từng level.</p>
       <div id="level-accuracy-stats"></div>
     </div>
 
@@ -217,7 +225,7 @@
         <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
         <h2 class="page-subheader-title">⚡ Theo thời gian trả lời</h2>
       </div>
-      <p class="exam-list-intro">Mục tiêu không chỉ là đúng, mà còn nhanh. Thời gian được ước lượng theo khoảng cách giữa các lần chọn đáp án.</p>
+      <p class="exam-list-intro">Không chỉ cần đúng, mà còn phải nhanh.</p>
       <div id="time-stats"></div>
       <p id="time-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
     </div>
@@ -227,11 +235,13 @@
         <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
         <h2 class="page-subheader-title">🧠 Phân tích nhầm lẫn</h2>
       </div>
-      <p class="exam-list-intro">Với mỗi từ bạn hay sai, đây là từ loại bạn thường chọn nhầm nhất — giúp thấy rõ kiểu nhầm lẫn (vd: hay nhầm Động từ thành Danh từ) thay vì chỉ biết đúng/sai.</p>
-      <table class="exam-table" id="confusion-table">
-        <thead><tr><th>Từ</th><th>Nghĩa</th><th>Đúng là</th><th>Bạn hay chọn nhầm</th></tr></thead>
-        <tbody id="confusion-body"></tbody>
-      </table>
+      <p class="exam-list-intro">Bạn thường nhầm từ loại nào sang từ loại nào.</p>
+      <div class="table-scroll">
+        <table class="exam-table" id="confusion-table">
+          <thead><tr><th>Từ</th><th>Nghĩa</th><th>Đúng là</th><th>Bạn hay chọn nhầm</th></tr></thead>
+          <tbody id="confusion-body"></tbody>
+        </table>
+      </div>
       <p id="confusion-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
     </div>
 
@@ -240,10 +250,12 @@
         <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
         <h2 class="page-subheader-title">📝 Theo từng đề</h2>
       </div>
-      <table class="exam-table">
-        <thead><tr><th>Đề</th><th>Trạng thái</th><th>Lượt làm</th><th>Điểm gần nhất</th><th>Điểm cao nhất</th><th>Ổn định</th></tr></thead>
-        <tbody id="exam-table-body"></tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="exam-table">
+          <thead><tr><th>Đề</th><th>Trạng thái</th><th>Lượt làm</th><th>Điểm gần nhất</th><th>Điểm cao nhất</th><th>Ổn định</th></tr></thead>
+          <tbody id="exam-table-body"></tbody>
+        </table>
+      </div>
     </div>
 
     <div class="screen-stat" id="stat-detail-history">
@@ -251,10 +263,12 @@
         <button type="button" class="back-link stat-back" aria-label="Quay lại Báo cáo"><span class="material-symbols-outlined">arrow_back</span></button>
         <h2 class="page-subheader-title">📜 Lịch sử làm bài</h2>
       </div>
-      <table class="exam-table" id="history-table">
-        <thead><tr><th>Thời gian</th><th>Đề</th><th>Level</th><th>Điểm</th><th>Đúng/Sai/Bỏ trống</th><th></th></tr></thead>
-        <tbody id="history-body"></tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="exam-table" id="history-table">
+          <thead><tr><th>Thời gian</th><th>Đề</th><th>Level</th><th>Điểm</th><th>Đúng/Sai/Bỏ trống</th><th></th></tr></thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
       <p id="history-empty" class="hint-empty">Chưa có lượt làm bài nào.</p>
       <p id="history-more" class="hint-note"></p>
     </div>
@@ -274,7 +288,7 @@
         <button type="button" class="back-link stat-back" aria-label="Quay lại Ôn tập"><span class="material-symbols-outlined">arrow_back</span></button>
         <h2 class="page-subheader-title">🧩 Theo hậu tố</h2>
       </div>
-      <p class="exam-list-intro">Đây là thống kê quan trọng nhất để biết bạn yếu quy tắc hậu tố nào.</p>
+      <p class="exam-list-intro">Hậu tố nào bạn còn yếu nhất.</p>
       <div class="bottom-actions left">
         <button class="btn-primary" id="btn-practice-weak-suffix"><span class="material-symbols-outlined">auto_fix_high</span> Ôn tập điểm yếu</button>
       </div>
@@ -290,10 +304,12 @@
       <div class="bottom-actions left">
         <button class="btn-primary" id="btn-practice-worst-words"><span class="material-symbols-outlined">auto_fix_high</span> Ôn tập từ sai nhiều nhất</button>
       </div>
-      <table class="exam-table" id="worst-words-table">
-        <thead><tr><th>Từ</th><th>Nghĩa</th><th>Số lần sai</th><th>Số lần đúng</th><th>Tỉ lệ đúng</th></tr></thead>
-        <tbody id="worst-words-body"></tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="exam-table" id="worst-words-table">
+          <thead><tr><th>Từ</th><th>Nghĩa</th><th>Số lần sai</th><th>Số lần đúng</th><th>Tỉ lệ đúng</th></tr></thead>
+          <tbody id="worst-words-body"></tbody>
+        </table>
+      </div>
       <p id="worst-words-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
     </div>
 
@@ -302,11 +318,13 @@
         <button type="button" class="back-link stat-back" aria-label="Quay lại Ôn tập"><span class="material-symbols-outlined">arrow_back</span></button>
         <h2 class="page-subheader-title">⭐ Từ đã thành thạo</h2>
       </div>
-      <p class="exam-list-intro">Các từ bạn đã làm đúng từ 2 lần trở lên và chưa sai lần nào — để thấy mình đã tiến bộ chứ không chỉ toàn điểm yếu.</p>
-      <table class="exam-table" id="best-words-table">
-        <thead><tr><th>Từ</th><th>Nghĩa</th><th>Số lần đúng</th><th>Tỉ lệ đúng</th></tr></thead>
-        <tbody id="best-words-body"></tbody>
-      </table>
+      <p class="exam-list-intro">Từ bạn đã làm đúng ≥2 lần, chưa sai lần nào.</p>
+      <div class="table-scroll">
+        <table class="exam-table" id="best-words-table">
+          <thead><tr><th>Từ</th><th>Nghĩa</th><th>Số lần đúng</th><th>Tỉ lệ đúng</th></tr></thead>
+          <tbody id="best-words-body"></tbody>
+        </table>
+      </div>
       <p id="best-words-empty" class="hint-empty">Chưa có dữ liệu — hãy làm vài đề trước.</p>
     </div>
 
@@ -315,7 +333,7 @@
         <button type="button" class="back-link stat-back" aria-label="Quay lại Ôn tập"><span class="material-symbols-outlined">arrow_back</span></button>
         <h2 class="page-subheader-title">🔤 Theo Word Family</h2>
       </div>
-      <p class="exam-list-intro">Các từ cùng gốc (ví dụ: advise / advice) — xem bạn nhầm từ loại ở dạng nào trong cùng một họ từ.</p>
+      <p class="exam-list-intro">Từ cùng gốc, ví dụ: advise / advice.</p>
       <div id="family-stats"></div>
       <p id="family-empty" class="hint-empty">Chưa có dữ liệu — cần làm thêm các câu có từ cùng gốc.</p>
     </div>
@@ -396,6 +414,6 @@
   </button>
 </nav>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=1.0.10"></script>
 </body>
 </html>

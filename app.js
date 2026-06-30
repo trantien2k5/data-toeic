@@ -82,6 +82,11 @@ async function loadQuestions() {
 
   loadProgress();
   renderExamList();
+  // Tab "Trang chủ" hiện sẵn (active) ngay từ HTML lúc mới mở trang — không
+  // có sự kiện "đổi tab" nào kích hoạt onTabChange() để gọi renderStats(),
+  // nên phải tự gọi 1 lần ở đây, nếu không hero/KPI sẽ đứng yên ở 0% cho tới
+  // khi người dùng bấm sang tab khác rồi quay lại.
+  renderStats();
 }
 
 function initEventListeners() {
@@ -297,9 +302,21 @@ function initEventListeners() {
   });
 }
 
+// Service worker: cho phép app chạy offline (cache app shell + dữ liệu đề).
+// Chỉ đăng ký khi chạy qua http(s) — mở trực tiếp file:// thì bỏ qua, vì
+// service worker không hoạt động ở scheme này (giống hạn chế fetch() đã nói
+// ở loadQuestions() phía trên).
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
+  navigator.serviceWorker.register('./sw.js').catch((err) => {
+    console.warn('Không thể đăng ký service worker (offline sẽ không hoạt động):', err);
+  });
+}
+
 // Bootstrap
 document.addEventListener('DOMContentLoaded', () => {
   initFullscreen();
   initEventListeners();
   loadQuestions();
+  registerServiceWorker();
 });

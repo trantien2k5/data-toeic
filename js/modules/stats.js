@@ -1,6 +1,6 @@
 import { CATEGORY_LABEL, TIME_BUCKETS, ANSWER_TO_CATEGORY } from './constants.js';
 import { state } from './state.js';
-import { el, formatDate, getSuffix, shuffle, showTab, showAlert } from './utils.js';
+import { el, formatDate, getSuffix, shuffle, showTab, showAlert, clearDirAfterAnimation } from './utils.js';
 import { getExamProgress } from './storage.js';
 import { startExam, viewHistoryEntry } from './quiz.js';
 
@@ -200,7 +200,10 @@ export function showStatScreen(id, direction = 'forward') {
   document.querySelectorAll('.screen-stat').forEach(s => s.classList.remove('active', 'dir-fwd', 'dir-back'));
   const screen = el(id);
   screen.classList.add('active');
-  if (direction !== 'none') screen.classList.add(direction === 'back' ? 'dir-back' : 'dir-fwd');
+  if (direction !== 'none') {
+    screen.classList.add(direction === 'back' ? 'dir-back' : 'dir-fwd');
+    clearDirAfterAnimation(screen);
+  }
   window.scrollTo(0, 0);
 }
 

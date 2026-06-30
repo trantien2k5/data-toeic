@@ -96,6 +96,20 @@ export function onTabChange(callback) {
   tabChangeListeners.push(callback);
 }
 
+// .dir-fwd/.dir-back chỉ cần tồn tại trong lúc animation chạy — chúng đặt
+// CSS `transform` lên màn hình, mà hễ có `transform` (kể cả translateX(0) ở
+// cuối animation) thì MỌI `position: fixed` bên trong nó (vd thanh nav-buttons
+// Trước/Tiếp lúc làm bài) sẽ fix theo phần tử đó thay vì theo viewport, làm
+// nó tụt xuống giữa trang. Phải tự gỡ class sau khi animation kết thúc,
+// không thể dựa vào lần showScreen() kế tiếp vì người dùng có thể ở nguyên
+// 1 màn hình rất lâu (cả lúc làm bài) trước khi chuyển màn khác.
+export function clearDirAfterAnimation(screen) {
+  screen.addEventListener('animationend', function handler() {
+    screen.classList.remove('dir-fwd', 'dir-back');
+    screen.removeEventListener('animationend', handler);
+  }, { once: true });
+}
+
 // direction: 'forward' (drilling into a screen, slide from right) | 'back'
 // (returning to a previous screen, slide from left) | 'none' (no animation,
 // e.g. resetting to the home screen on a bottom-tab switch).
@@ -103,7 +117,10 @@ export function showScreen(id, direction = 'forward') {
   document.querySelectorAll('#tab-exams .screen').forEach(s => s.classList.remove('active', 'dir-fwd', 'dir-back'));
   const screen = el(id);
   screen.classList.add('active');
-  if (direction !== 'none') screen.classList.add(direction === 'back' ? 'dir-back' : 'dir-fwd');
+  if (direction !== 'none') {
+    screen.classList.add(direction === 'back' ? 'dir-back' : 'dir-fwd');
+    clearDirAfterAnimation(screen);
+  }
   window.scrollTo(0, 0);
 }
 

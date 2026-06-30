@@ -1,0 +1,4 @@
+{
+  "version": "1.0.10",
+  "_note": "Đổi 'version' mỗi khi sửa CSS/JS rồi deploy. sw.js tự đọc số này để đặt tên cache (không cần sửa sw.js). Các thẻ <link>/<script> trong index.html thì PHẢI tự tay cập nhật ?v= cho khớp, vì index.html là file tĩnh, không tự đọc được file này trước khi tải CSS."
+}

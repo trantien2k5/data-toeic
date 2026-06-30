@@ -64,7 +64,10 @@ header.topbar h1 .material-symbols-outlined {
   padding: 7px 14px;
   border-radius: 10px;
   white-space: nowrap;
-  display: flex;
+  /* Không đặt display ở đây — quiz.js tự set inline-flex khi bắt đầu thi.
+     Để mặc định theo class .hidden (display:none); 1 ID selector có
+     specificity cao hơn .hidden nên nếu đặt display:flex ở đây, đồng hồ sẽ
+     hiện ngay cả khi đang ở class="hidden" lúc chưa làm bài. */
   align-items: center;
   gap: 6px;
   box-shadow: 0 0 15px rgba(244, 63, 94, 0.05);

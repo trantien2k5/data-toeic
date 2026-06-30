@@ -74,6 +74,16 @@ html, body {
   scrollbar-width: thin;
 }
 
+/* .app-body căn giữa bằng margin:0 auto — nếu thanh cuộn dọc chỉ xuất hiện
+   khi tab nào đó nội dung dài hơn (vd "Luyện đề" so với "Trang chủ"), chiều
+   rộng khả dụng thay đổi mỗi lần đổi tab, làm cả khối nội dung bị xê dịch
+   ngang. Luôn chừa sẵn chỗ cho thanh cuộn để chiều rộng khả dụng cố định,
+   bất kể tab đang xem dài hay ngắn. */
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 /* ===== Custom scrollbar ===== */
 ::-webkit-scrollbar {
   width: 8px;
